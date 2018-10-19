@@ -4,13 +4,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
 #include <algorithm>
-#include <string_view>
-#include <tuple>
 #include <chrono>
 #include <thread>
+#include <mutex>
 #include <fstream>
+#include <sstream>
 #include <map>
+#include <optional>
+
+#ifdef _MSC_VER
+	#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+#endif
 #include <boost/regex.hpp> //try precomp headers
 #endif // COMMON_STD_HEADERS_HPP_INCLUDED

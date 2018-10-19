@@ -1,6 +1,6 @@
 #include "m_view.h"
 
-m_view::m_view():  model(nullptr), controller(nullptr)
+m_view::m_view()
 {
     //ctor
 }
@@ -46,11 +46,11 @@ std::vector<std::string> m_view::split_answer(const std::string& answer)
         }
     else
         {
-            return {command_name, ""}; //not always int
+            return {command_name, ""};
         }
 }
 
-bool m_view::is_valid_answer(std::string answer)
+bool m_view::is_valid_answer(const std::string& answer)
 {
     if (!answer.empty() && (answer.size()<=10) )
         {

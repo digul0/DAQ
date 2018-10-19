@@ -1,17 +1,13 @@
 #include <algorithm>
-
-
 #include "m_open_port.hpp"
 
 #define OPEN_CLOSE_LOG_ON
 #ifdef OPEN_CLOSE_LOG_ON
-  #include "m_log.hpp"
+#include "m_log.hpp"
 #endif // OPEN_CLOSE_LOG_ON
 
-//using namespace m_open_port; ?
 using namespace std::chrono_literals;
 using std::string;
-using std::lock_guard;
 using std::mutex;
 using std::atomic;
 
@@ -36,24 +32,25 @@ bool m_open_port::open()
     if( hComPort ==  0 )
         {
             const char *full_com_name = (_port_init_string + std::to_string(_num_of_port)).c_str();
-            hComPort    =   CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING,/*FILE_FLAG_OVERLAPPED*/0, 0);
-            _failure     =   (hComPort == INVALID_HANDLE_VALUE);
+            hComPort = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING,/*FILE_FLAG_OVERLAPPED*/0, 0);
+            _failure = (hComPort == INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
             if (!_failure)
                 m_log()<<"Port "<<_num_of_port<<" is opened!"<<'\n';
-            else
-                m_log()<<"Port "<<_num_of_port<<" opening error!" <<'\n';
-
-            if(_failure)
-                ++m_log::_failure_to_open_port_Counter;
 #endif // OPEN_CLOSE_LOG_ON
+            if (_failure)
+                {
+                    m_log()<<"Port "<<_num_of_port<<" opening error!" <<'\n';
+                    //++m_log::_failure_to_open_port_Counter;
+                    throw "Can't open port";
+                }
         }
     return !_failure;
 }
 
 void m_open_port::init()
 {
-//структуры DCB и COMMTIMEOUTS с работающего, настроенного через TeraTerm порта
+//structs DCB и COMMTIMEOUTS copied from port tuned by using TeraTerm.
     DCB dcb = {};
     dcb.DCBlength =             sizeof(DCB)/*28*/;
     dcb.BaudRate =             9600;
@@ -84,8 +81,8 @@ void m_open_port::close()
     if (is_valid())
         {
             CloseHandle(hComPort); ///так себе вообщения
-            _failure     =   true;
-            hComPort    =   0;
+            _failure = true;
+            hComPort = 0;
 #ifdef OPEN_CLOSE_LOG_ON
             m_log() << "Port COM" << _num_of_port << " closed!" << '\n';
 #endif // OPEN_CLOSE_LOG_ON
@@ -97,11 +94,11 @@ void m_open_port::write_raw(const std::string& command)
       Data exchange by protocol structure: [ASCII command][null-terminator][CL+LF].
     */
     //static const char eol[] = "\n";
-    if (command.empty()) return;
+    if (!this->is_valid() || command.empty())
+        return;
     constexpr char CRLF[] = "\r\n";
     DWORD bytes_written = 0;
-    if (!this->is_valid())
-        return;
+
     flushPort();
     // split into 2 write operations
     //Send command string with null-terminator
@@ -110,8 +107,6 @@ void m_open_port::write_raw(const std::string& command)
     //Send CRLF string without null-terminator
     WriteFile(hComPort, CRLF, sizeof(CRLF) - 1, &bytes_written, 0);
     //                                      ^^ - null-terminator
-    ///to test nonstop r/w from com! And r/w using delays
-
     return ;
 }
 string m_open_port::read_raw()
@@ -124,26 +119,28 @@ string m_open_port::read_raw()
     DWORD sz_buf = sizeof(buf)/sizeof(*buf);
     constexpr char CRLF[] = "\r\n";
     ReadFile (hComPort, buf, sz_buf, &bytes_read, 0);
-    auto findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF)); //slice '\r\n' for raw not null-terminated string
+    auto findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
     size_t temp_br = bytes_read;
 
     for(size_t try_counter = 0; findCRLF == cend(buf); ++try_counter)
         {
             std::this_thread::sleep_for(100ms);
 
-            ReadFile (hComPort, &buf[temp_br], sz_buf, &bytes_read, 0);
+            ReadFile (hComPort, &buf[temp_br], sz_buf, &bytes_read, 0); //resume reading, to &buf[bytes_read]
             temp_br+= bytes_read;
             findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
             if (try_counter > 3)
-            {
-              return "";
-            }//do exit or smth else
+                {
+                    return "";
+                }
         }
     string r ( cbegin(buf), findCRLF) ;
-#ifdef OPEN_CLOSE_LOG_ON
-    if (!bytes_read)
-        ++m_log::_failure_to_read_port_Counter;
-#endif // OPEN_CLOSE_LOG_ON
+
+//#ifdef OPEN_CLOSE_LOG_ON
+//    if (!bytes_read)
+//        ++m_log::_failure_to_read_port_Counter;
+//#endif // OPEN_CLOSE_LOG_ON
+
     return r;
 }
 const bool m_open_port::is_valid() const
@@ -163,7 +160,6 @@ void m_open_port::flushPort(void)
 {
     if (is_valid())
         {
-            //PurgeComm(hComPort, PURGE_RXCLEAR | PURGE_RXABORT);
             PurgeComm(hComPort, PURGE_TXCLEAR);// | PURGE_TXABORT);
         }
 }

@@ -5,39 +5,55 @@
 #include "m_model.h" //!!!
 #include "m_view.h"
 #include "m_log.hpp"
-#include <cassert>
+#include "m_options_parser.h"
+
+
 using namespace std::chrono_literals;
-using std::stoi, std::log, std::stod;
+using std::stoi, std::log, std::stod, std::vector;
 
-m_controller::m_controller(Settings::settings_struct ss):
-    _block_place(ss.position), temperature_mode(ss.temperature_mode), _receptacle(ss.receptacle),
+m_controller::m_controller(const Settings::settings_struct& ss):
+    _block_place(ss.position), _temperature_mode(ss.temperature_mode), _receptacle(ss.receptacle),
     _delay(500ms),
-    local_results_storage(std::move(std::vector<_results_storage>(num_of_positions) ))
+    _local_results_storage(std::move(std::vector<ResultsStorage>(_num_of_positions) ))
 {
-
 }
-m_controller::~m_controller()
+m_controller::~m_controller() = default;
+
+void m_controller::setView(m_view* _view)
 {
-
+    view = _view;
 }
+void m_controller::setModel(m_model* _model)
+{
+    model = _model;
+}
+
 using namespace std;
 
 void m_controller::do_branch()
 {
     while(!model->end_commands())
         {
-          size_t try_counter {1};
-          string answer ;
-          do
-            {
-              if (try_counter++ > 3) { m_log()<< model->get_current_command()<<" 3-times fold"<<'\n'; } //add exit code
+            size_t try_counter = 0;
+            string answer ;
+            //Handler invalid answer event
+            do
+                {
+                    if (++try_counter > 3)
+                        {
+                            m_log()<< model->get_current_command()<<" 3-times fold"<<'\n';
+                            //TODO: add exit code
+                            throw "try counter > 3";
+                        }
 
-              model->execute_command();
-              this_thread::sleep_for(_delay);
-              answer = model->read_answer();
-            } while (!view->is_valid_answer(answer));
 
-            //TODO valid test if not execute_command()
+                    model->execute_command();
+                    this_thread::sleep_for(_delay);
+                    answer = model->read_answer();
+                }
+            while (!view->is_valid_answer(answer));
+
+
 
             auto res = view->split_answer(answer);
             parse_and_push_into_result(res);
@@ -48,10 +64,10 @@ void m_controller::do_branch()
 }
 void m_controller::parse_and_push_into_result(std::vector<std::string> res )
 {
-    //check size res
     auto from_Ohm_to_T = [](double Ohm)
     {
-        if (Ohm < 0.01)
+      //allowed range values of Ohm
+        if ((Ohm < 600) || (Ohm > 20000))
             return -273.15;
         return (-26.19*std::log(Ohm) + 265.7 ); //empiric formula
     };
@@ -63,8 +79,8 @@ void m_controller::parse_and_push_into_result(std::vector<std::string> res )
             auto serial = res[4];
             for (size_t i = 0; i < 8 ; ++i )
                 {
-                    local_results_storage[i].Serial = serial;
-                    local_results_storage[i].Position = _block_place + "-" + to_string(i + 1);
+                    _local_results_storage[i].Serial = serial;
+                    _local_results_storage[i].Position = _block_place + "-" + to_string(i + 1);
                 }
 
         }
@@ -78,31 +94,31 @@ void m_controller::parse_and_push_into_result(std::vector<std::string> res )
             if (mode == SET)
                 {
                     if      (param_num == 1)
-                        local_results_storage[ch_number].I_SLD_SET          = measured_data / 10.0 ;
+                        _local_results_storage[ch_number].I_SLD_SET          = measured_data / 10.0 ;
                     else if (param_num == 2)
                         {
-                            local_results_storage[ch_number].T_SET_Ohm          = measured_data ;
-                            local_results_storage[ch_number].T_SET              = from_Ohm_to_T(measured_data) ;
+                            _local_results_storage[ch_number].T_SET_Ohm          = measured_data ;
+                            _local_results_storage[ch_number].T_SET              = from_Ohm_to_T(measured_data) ;
+                            //m_log()<<_local_results_storage[ch_number].T_SET_Ohm << '\n';
                         }
                     else if (param_num == 3)
-                        local_results_storage[ch_number].LIMIT              = measured_data / 10.0;
+                        _local_results_storage[ch_number].LIMIT              = measured_data / 10.0;
                     else if (param_num == 4) {}; //do nothing
                 }
             else if (mode == REAL)
                 {
                     if      (param_num == 1)
-                        local_results_storage[ch_number].I_SLD_REAL         = measured_data / 10.0 ;
+                        _local_results_storage[ch_number].I_SLD_REAL         = measured_data / 10.0 ;
                     else if (param_num == 2)
                         {
-                            local_results_storage[ch_number].T_REAL_Ohm         = measured_data;
-                            local_results_storage[ch_number].T_REAL             = from_Ohm_to_T(measured_data);
+                            _local_results_storage[ch_number].T_REAL_Ohm         = measured_data;
+                            _local_results_storage[ch_number].T_REAL             = from_Ohm_to_T(measured_data);
                         }
                     else if (param_num == 3)
-                        local_results_storage[ch_number].PD_INT_average     = measured_data / 1000.0;
+                        _local_results_storage[ch_number].PD_INT_average     = measured_data / 1000.0;
                     else if (param_num == 4)
-                        local_results_storage[ch_number].PD_EXT_average     = measured_data / 1000.0;
+                        _local_results_storage[ch_number].PD_EXT_average     = measured_data / 1000.0;
                 }
-            //go next command
         }
     else //"A1, A2, A4"
         {
@@ -118,22 +134,22 @@ void m_controller::parse_and_push_into_result(std::vector<std::string> res )
 void m_controller::acqure_temperature()
 {
     //delay = 500ms;
-    model->choose_commands_pool(m_model::test::acqure_temperature); //ужс
+    model->choose_commands_pool(m_model::CommandsPoolName::acqure_temperature);
     do_branch();
 }
 bool m_controller::test_temperature()
 {
     enum {TEMP_MODE_DEFAULT = 0, TEMP_MODE_NOSWITCH = 1 };
-    if (temperature_mode == TEMP_MODE_NOSWITCH )
+    if (_temperature_mode == TEMP_MODE_NOSWITCH )
         return false; // ->skip test by options requirements
     constexpr double deviance = 0.25 ; //%
     constexpr double ambient_temperature = 25.0;
 
     bool res = false;
-    for (size_t i = 0; i < num_of_positions; i++)
+    for (size_t i = 0; i < _num_of_positions; ++i)
         {
-            if ((local_results_storage[i].T_SET > ambient_temperature *( 1 + deviance )) ||
-                    (local_results_storage[i].T_SET < ambient_temperature *( 1 - deviance )))
+            if ((_local_results_storage[i].T_SET > ambient_temperature *( 1 + deviance )) ||
+                    (_local_results_storage[i].T_SET < ambient_temperature *( 1 - deviance )))
                 res = true;
         }
     return res;
@@ -147,17 +163,17 @@ void m_controller::print_results()
     {
         ofstream (log_name, ofstream::trunc);
     } );
-    ofstream logfile (log_name, ofstream::app);
+    ofstream logfile (log_name, ofstream::app); //Many threads simultaniosly try open this file?
     auto&& out = m_log(logfile); ///???
-    for (size_t i = 0; i < num_of_positions; i++)
+    for (size_t i = 0; i < _num_of_positions; i++)
         {
             std::move(out) << setprecision(3) << fixed << showpoint
-                           << local_results_storage[i].Position << " "
-                           << local_results_storage[i].Serial << " "
-                           << local_results_storage[i].PD_INT_average << " "
+                           << _local_results_storage[i].Position << " "
+                           << _local_results_storage[i].Serial << " "
+                           << _local_results_storage[i].PD_INT_average << " "
                            << setprecision(1)
-                           << local_results_storage[i].I_SLD_REAL << " "
-                           << local_results_storage[i].T_REAL << " "
+                           << _local_results_storage[i].I_SLD_REAL << " "
+                           << _local_results_storage[i].T_REAL << " "
                            << '\n';
         }
     //int i = m_log::_failure_to_read_port_Counter;
@@ -166,20 +182,19 @@ void m_controller::print_results()
 }
 void m_controller::acqure_25()
 {
-    //delay = 500ms;
-    model->choose_commands_pool(m_model::test::acqure_25);
+    model->choose_commands_pool(m_model::CommandsPoolName::acqure_25);
     do_branch();
 }
 //остается переключенным на +25 если оборвать опрос - bug!
 void m_controller::acqure_55()
 {
-    //delay = 500ms;
-    model->choose_commands_pool(m_model::test::switch_down);
+    model->choose_commands_pool(m_model::CommandsPoolName::switch_down);
     do_branch();
+    m_log()<<"Switch and balanced temperature ... wait." << '\n';
     //Wait while temperature balanced.
     this_thread::sleep_for(60s);
     acqure_25();
-    model->choose_commands_pool(m_model::test::switch_up);
+    model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
     do_branch();
 }
 void m_controller::experimental_measurements()
@@ -187,8 +202,8 @@ void m_controller::experimental_measurements()
 
 
 }
-std::vector<m_controller::_results_storage>
+std::vector<m_controller::ResultsStorage>
 m_controller::get_local_results_storage()
 {
-    return local_results_storage;
+    return _local_results_storage;
 }

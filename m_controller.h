@@ -1,32 +1,37 @@
+#ifndef M_CONTROLLER_H
+#define M_CONTROLLER_H
+
 #include "common_std_headers.hpp"
-#include "m_options_parser.h"
-//#include "m_view.h"
+
+
+//forward declarations
+namespace Settings{
+  class settings_struct;
+}
 class m_model;
 class m_view;
-
+//
 
 class m_controller
 {
-
+  /**
+   *  @brief  Provide application main logic
+   *
+   *  Contains com-port aquicition algorithms,
+   *  provided by model interface; answer analyse;
+   *  error handle; output data formation.
+   */
 public:
-    /** Default constructor */
-    explicit m_controller(Settings::settings_struct ss);
+    explicit m_controller(const Settings::settings_struct& ss);
     m_controller(const m_controller&) = delete;
-    operator=(const m_controller&) = delete;
-    /** Default destructor */
+	  m_controller& operator=(const m_controller&) = delete;
     ~m_controller();
 
     /** MVC interface functions*/
-    void setView(m_view* _view)
-    {
-        view = _view;
-    }
-    void setModel(m_model* _model)
-    {
-        model = _model;
-    }
+    void setView(m_view* _view);
+    void setModel(m_model* _model);
 public:
-    struct _results_storage
+    struct ResultsStorage
     {
         std::string Position;
         std::string Serial;
@@ -51,20 +56,17 @@ private:
     };
     /** interface functions*/
 public:
-    //void result_analyse(parse_result_type res);
-    void parse_and_push_into_result(std::vector<std::string> res );
-
-
     void acqure_temperature();
     void acqure_25();
     void acqure_55();
     bool test_temperature();
-    void experimental_measurements(); ///experimental
+    ///experimental
+    void experimental_measurements();
     void do_branch();
+    void print_results();  //don't need
 
-    void print_results();
-    //std::unique_ptr<_results_storage[]> get_local_results_storage();
-    std::vector<_results_storage> get_local_results_storage();
+    void parse_and_push_into_result(std::vector<std::string> res );
+    std::vector<ResultsStorage> get_local_results_storage();
 
 private:
     /** MVC members*/
@@ -73,12 +75,13 @@ private:
 
 private:
     std::string                 _block_place;
-    int                         temperature_mode;
+    int                         _temperature_mode;
     int                         _receptacle;
     _MiniIOstate                IOstate{};
     //delay before commands
     std::chrono::milliseconds   _delay;
-    constexpr static size_t     num_of_positions{ 8 }; //Device channels constant
-    std::vector<_results_storage> local_results_storage;
+    constexpr static size_t     _num_of_positions  {8} ; //Device channels constant
+    std::vector<ResultsStorage> _local_results_storage;
 
 };
+#endif // M_CONTROLLER_H
