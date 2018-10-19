@@ -35,7 +35,7 @@ public:
 
     string read_settings_to_whole_string(have_header h = have_header::no_have) const
     {
-      if (_f.bad()) return "";
+      if (_f.bad()) throw "file not exist";
         stringstream s;
         //skip settings header
         if ( h == have_header::have )
