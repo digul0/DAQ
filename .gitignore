@@ -3,6 +3,7 @@
 bin/
 obj/
 doxygen/
+cmake/
 *.log
 *.txt
 !CmakeLists.txt
