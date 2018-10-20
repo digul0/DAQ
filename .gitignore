@@ -1,0 +1,12 @@
+*.[oa]
+*.exe
+bin/
+obj/
+doxygen/
+*.log
+*.txt
+*.cbp
+*.cscope_file_list
+*.depend
+*.layout
+*.xml
