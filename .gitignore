@@ -5,6 +5,7 @@ obj/
 doxygen/
 *.log
 *.txt
+!CmakeLists.txt
 *.cbp
 *.cscope_file_list
 *.depend
