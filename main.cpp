@@ -9,33 +9,37 @@
 #include "m_log.hpp"
 /*
 #include "m_model.h"
-ќбеспечивает интерфейс дл€ выбора и исполнени€ предварительно скомпилированного потока команд
+обеспечивает интерфейс дл€ выбора и исполнени€ предварительно скомпилированного потока команд,
 а так же получени€ ответа от com-порта.
-Provide choosing and executing compliled commands-pool interface, and acquisition data from com-port.
+
+Provides an interface for selecting and executing a precompiled command flow, as well as receiving a response from the com port.
 
 #include "m_view.h"
-ќбеспечивает валидацию ответа и разбиению(trim/tagging) цельного ответа на составл€ющие согласно заданному шаблону
-Provide answer validation and tagged answer to tags by specified regular expressions.
+Обеспечивает валидацию ответа и разбиению(trim/tagging) цельного ответа на составл€ющие согласно заданному шаблону
+
+Provides validation of the response and splitting a complete response to the components according to a specified regular expressions.
+
 #include "m_controller.h"
-ќбеспечивает основную логику приложени€: управление алгоритмом опроса com-порта с помощью интерфейса
+Обеспечивает основную логику приложени€: управление алгоритмом опроса com-порта с помощью интерфейса
 модели, анализ поступивших ответов, обработка ошибок и формирование массива выходных данных.
-Provide application main logic: it contains com-port aquicition algorithms,
-provided by model interface; answer analyse; error handle; output data formation.
+
+Provides the main application logic: control of the com-port polling algorithm using the model interface,
+analysis of incoming responses, error handling and generation of an output data.
 
 #include "m_options_parser.h"
-ќбеспечивает парсинг файлов текстовых настроек (вшитые Portmap.ini, Job.ini),
+Обеспечивает парсинг файлов текстовых настроек (вшитые Portmap.ini, Job.ini),
 выборку (aka SQL "SELECT [Portmap.ini].* FROM [Job.ini], [Portmap.ini] WHERE [Portmap.ini].Position=[Job.ini].Position)
 и передача результата пользователю.
-Provide text options files parsing (concrete files are "Portmao.ini" and "Job.ini"),
-make selection (aka SQL "SELECT [Portmap.ini].* FROM [Job.ini], [Portmap.ini] WHERE [Portmap.ini].Position=[Job.ini].Position)
-and put this selection result to user.
+Provides parsing of text settings files (Portmap.ini, Job.ini),
+sampling (aka SQL "SELECT [Portmap.ini]. * FROM [Job.ini], [Portmap.ini] WHERE [Portmap.ini] .Position = [Job.ini] .Position") and transfer the result to the user.
 
 #include "m_open_port.hpp"
-ќбеспечивает настройку, подключение и интерфейс синхронного чтени€/записи в Com-порт.
-Provide com-port setting, connecting, and interface synchronized read/write interface.
+Обеспечивает настройку, подключение и интерфейс синхронного чтени€/записи в Com-порт.
+Provides configuration, connection and synchronous read / write interface to the Com port.
+
 #include "m_log.hpp"
-ќбеспечивает многопоточный вывод в консоль
-Provide multithread output to console.
+Обеспечивает многопоточный вывод в консоль
+Provides multi-threaded console output
 */
 /**
 CMake
