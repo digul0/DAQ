@@ -16,5 +16,10 @@
 #ifdef _MSC_VER
 	#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #endif
-#include <boost/regex.hpp> //try precomp headers
+//define from Cmake if boost is find
+#ifdef HAS_BOOST
+  #include <boost/regex.hpp>
+#else
+  #include <regex>
+#endif // HAS_BOOST
 #endif // COMMON_STD_HEADERS_HPP_INCLUDED

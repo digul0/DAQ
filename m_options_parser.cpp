@@ -2,7 +2,13 @@
 #include "m_options_parser.h"
 #endif // PARSER_H
 
-using namespace std;
+#ifdef HAS_BOOST
+using boost::regex, boost::sregex_iterator, boost::regex;
+#else
+using std::regex, std::sregex_iterator, std::regex;
+#endif // HAS_BOOST
+
+using std::string, std::vector, std::map;
 namespace Settings
 {
 	vector<settings_struct>
@@ -15,13 +21,13 @@ namespace Settings
 		"(\\d+)\\s"  "([A-Z]\\d+-\\d)"  "\\s(\\d+)\\s(\\d)";
 		// ^^            ^^                  ^^        ^^
 		//Port        Position             Receptacle Temperature
-		boost::regex r(options_format);
+		regex r(options_format);
 
 		//get string with content of settings file
 		string portmap_ini_string = SettingsReader(_portmap_ini_name).read_settings_to_whole_string();
 
 		map<string, settings_struct> name_to_com_table;
-		for (boost::sregex_iterator it(portmap_ini_string.begin(), portmap_ini_string.end(), r), end_it;
+		for (sregex_iterator it(portmap_ini_string.begin(), portmap_ini_string.end(), r), end_it;
 			it != end_it; ++it)
 		{
 			if (it->size() != 0) {
@@ -37,14 +43,14 @@ namespace Settings
 		string position_search_pattern =
 		"([A-Z]\\d+-\\d)";
 		//BXX-X
-		boost::regex r2(position_search_pattern);
+		regex r2(position_search_pattern);
 		//get string with content of settings file
 		string job_ini_string = SettingsReader(_job_ini_name).read_settings_to_whole_string();
 
 		vector<settings_struct> nc;
 
 		//parse string with content of settings file
-		for (boost::sregex_iterator it(job_ini_string.begin(), job_ini_string.end(), r2), end_it;
+		for (sregex_iterator it(job_ini_string.begin(), job_ini_string.end(), r2), end_it;
 			it != end_it; ++it)
 		{
 			if (it->size() != 0)
