@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <fstream>
+#include <cmath>
 
 #include "m_controller.h"
 #include "m_model.h" //!!!
@@ -7,14 +8,13 @@
 #include "m_log.hpp"
 #include "m_options_parser.h"
 
-
 using namespace std::chrono_literals;
-using std::stoi, std::log, std::stod, std::vector;
+using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 
 m_controller::m_controller(const Settings::settings_struct& ss):
     _block_place(ss.position), _temperature_mode(ss.temperature_mode), _receptacle(ss.receptacle),
     _delay(500ms),
-    _local_results_storage(std::move(std::vector<ResultsStorage>(_num_of_positions) ))
+    _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions) ))
 {
 }
 m_controller::~m_controller() = default;
@@ -28,7 +28,7 @@ void m_controller::setModel(m_model* _model)
     model = _model;
 }
 
-using namespace std;
+//using namespace std;
 
 void m_controller::do_branch()
 {
@@ -48,7 +48,7 @@ void m_controller::do_branch()
 
 
                     model->execute_command();
-                    this_thread::sleep_for(_delay);
+                    std::this_thread::sleep_for(_delay);
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
@@ -59,10 +59,10 @@ void m_controller::do_branch()
             parse_and_push_into_result(res);
             m_log() << model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
             model->go_next_command();
-            this_thread::sleep_for(_delay);
+            std::this_thread::sleep_for(_delay);
         }
 }
-void m_controller::parse_and_push_into_result(std::vector<std::string> res )
+void m_controller::parse_and_push_into_result(vector<string> res )
 {
     auto from_Ohm_to_T = [](double Ohm)
     {
@@ -154,32 +154,6 @@ bool m_controller::test_temperature()
         }
     return res;
 }
-void m_controller::print_results()
-{
-    const string log_name = "123.log";
-    static once_flag flag {}; //mb not thread safe
-    //log clear
-    call_once( flag, [&log_name]()
-    {
-        ofstream (log_name, ofstream::trunc);
-    } );
-    ofstream logfile (log_name, ofstream::app); //Many threads simultaniosly try open this file?
-    auto&& out = m_log(logfile); ///???
-    for (size_t i = 0; i < _num_of_positions; i++)
-        {
-            std::move(out) << setprecision(3) << fixed << showpoint
-                           << _local_results_storage[i].Position << " "
-                           << _local_results_storage[i].Serial << " "
-                           << _local_results_storage[i].PD_INT_average << " "
-                           << setprecision(1)
-                           << _local_results_storage[i].I_SLD_REAL << " "
-                           << _local_results_storage[i].T_REAL << " "
-                           << '\n';
-        }
-    //int i = m_log::_failure_to_read_port_Counter;
-    //std::move(out) << i <<'\n';
-
-}
 void m_controller::acqure_25()
 {
     model->choose_commands_pool(m_model::CommandsPoolName::acqure_25);
@@ -192,7 +166,7 @@ void m_controller::acqure_55()
     do_branch();
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
     //Wait while temperature balanced.
-    this_thread::sleep_for(60s);
+    std::this_thread::sleep_for(60s);
     acqure_25();
     model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
     do_branch();

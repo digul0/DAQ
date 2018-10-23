@@ -1,16 +1,13 @@
 /**@file Хедеры для набора классов для парсинга опций из обычных текстовых файлов.
  *@brief Файл с опциями из-за требований обратной совместимости
  * представляет собой список строк с '\n' на конце.
- * Два файла "
+ * Два файла
  */
 #ifndef M_OPTIONS_PARSER_H
 #define M_OPTIONS_PARSER_H
 
 #include "common_std_headers.h"
 
-#pragma once
-//#include "boost/regex.hpp"
-//mb SQLite and "SELECT "Portmap.ini".position FROM "Job.ini" etc.
 namespace Settings
 {
 using namespace std;
