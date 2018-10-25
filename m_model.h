@@ -70,7 +70,8 @@ private:
 
 public:
     void choose_commands_pool(CommandsPoolName choose);
-    void execute_command ();
+    void execute_single_command (const std::string& command);
+    void execute_current_command ();
     answer_imp_type  read_answer() ;
     void go_next_command();
     const bool end_commands ();

@@ -65,7 +65,7 @@ public:
     void do_branch();
     void single_command_execute(const std::string& command);
 
-    void parse_and_push_into_result(std::vector<std::string> res );
+    void parse_and_push_into_result(std::vector<std::string> res);
     std::vector<ResultsStorage> get_local_results_storage();
 
 private:

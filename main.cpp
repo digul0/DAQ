@@ -71,7 +71,7 @@ int main()
     auto process = [&global_results_storage](auto ss)
     {
         //settings
-        m_model m (ss);
+        m_model m (ss); //throw ex. here - abort! Fix it!
         m_view v;
         m_controller c(ss);
 

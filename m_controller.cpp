@@ -45,7 +45,7 @@ void m_controller::do_branch()
                         }
 
 
-                    model->execute_command();
+                    model->execute_current_command();
                     std::this_thread::sleep_for(_delay);
                     answer = model->read_answer();
                 }
@@ -60,7 +60,7 @@ void m_controller::do_branch()
             std::this_thread::sleep_for(_delay);
         }
 }
-void m_controller::parse_and_push_into_result(vector<string> res )
+void m_controller::parse_and_push_into_result(vector<string> res)
 {
     auto from_Ohm_to_T = [](double Ohm)
     {
@@ -181,5 +181,5 @@ m_controller::get_local_results_storage()
 }
 void single_command_execute(const string& command)
 {
-
+  //model->
 }

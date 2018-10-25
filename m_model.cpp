@@ -139,15 +139,17 @@ void m_model::commands_pool_init()
 
 
 }
-void  m_model::execute_command ()
+void  m_model::execute_current_command ()
 {
     if (!_end_of_branch)
-        {
-            _current_command = *_current_command_seq_it;
-            _port->write_raw(_current_command);
-        }
-}
+        execute_single_command(*_current_command_seq_it);
 
+}
+void  m_model::execute_single_command (const std::string& command)
+{
+    _current_command = command;
+    _port->write_raw(_current_command);
+}
 void m_model::go_next_command()
 {
 
