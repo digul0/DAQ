@@ -23,16 +23,17 @@ struct settings_struct
 class SettingsReader
 {
 private:
+    const string _filename;
     mutable ifstream _f;
 public:
-    explicit SettingsReader( const string& ini_name ) : _f(ini_name) {}
+    explicit SettingsReader( const string& ini_name ) : _filename(ini_name), _f(ini_name) {}
     SettingsReader( const SettingsReader& )  =  delete;
     enum class have_header
     {    have,    no_have  };
 
     string read_settings_to_whole_string(have_header h = have_header::no_have) const
     {
-      if (_f.bad()) throw "file not exist";
+      if (_f.bad()) throw m_exception_inf(std::string(_filename) + " file not exist!");
         stringstream s;
         //skip settings header
         if ( h == have_header::have )

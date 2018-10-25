@@ -40,9 +40,8 @@ bool m_open_port::open()
 #endif // OPEN_CLOSE_LOG_ON
             if (_failure)
                 {
-                    m_log()<<"Port "<<_num_of_port<<" opening error!" <<'\n';
                     //++m_log::_failure_to_open_port_Counter;
-                    throw "Can't open port";
+                    throw m_exception_inf(string("IO error: Can't open port: COM") + std::to_string(_num_of_port)) ;
                 }
         }
     return !_failure;

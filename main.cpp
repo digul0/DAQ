@@ -92,10 +92,12 @@ int main()
                     }
 
             }
-        catch (...)
+        catch (const exception& ex)
             {
+
                 //closing thread only
                 //TODO adequate err handler
+                m_log()<< ex.what() << '\n';
                 return ;
             }
 

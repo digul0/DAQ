@@ -41,9 +41,7 @@ void m_controller::do_branch()
                 {
                     if (++try_counter > 3)
                         {
-                            m_log()<< model->get_current_command()<<" 3-times fold"<<'\n';
-                            //TODO: add exit code
-                            throw "try counter > 3";
+                            throw m_exception_inf("IO error: try counter > 3");
                         }
 
 
@@ -180,4 +178,8 @@ std::vector<m_controller::ResultsStorage>
 m_controller::get_local_results_storage()
 {
     return _local_results_storage;
+}
+void single_command_execute(const string& command)
+{
+
 }
