@@ -28,15 +28,13 @@ void m_controller::setModel(m_model* _model)
     model = _model;
 }
 
-//using namespace std;
-
 void m_controller::do_branch()
 {
     while(!model->end_commands())
         {
             size_t try_counter = 0;
             string answer ;
-            //Handler invalid answer event
+            //Handler of invalid answer event
             do
                 {
                     if (++try_counter > 3)
@@ -64,7 +62,7 @@ void m_controller::parse_and_push_into_result(vector<string> res)
 {
     auto from_Ohm_to_T = [](double Ohm)
     {
-      //allowed range values of Ohm
+      ///allowed thermoresistor resistance value range in Ohm
         if ((Ohm < 600) || (Ohm > 20000))
             return -273.15;
         return (-26.19*std::log(Ohm) + 265.7 ); //empiric formula
@@ -97,7 +95,6 @@ void m_controller::parse_and_push_into_result(vector<string> res)
                         {
                             _local_results_storage[ch_number].T_SET_Ohm          = measured_data ;
                             _local_results_storage[ch_number].T_SET              = from_Ohm_to_T(measured_data) ;
-                            //m_log()<<_local_results_storage[ch_number].T_SET_Ohm << '\n';
                         }
                     else if (param_num == 3)
                         _local_results_storage[ch_number].LIMIT              = measured_data / 10.0;
@@ -118,7 +115,7 @@ void m_controller::parse_and_push_into_result(vector<string> res)
                         _local_results_storage[ch_number].PD_EXT_average     = measured_data / 1000.0;
                 }
         }
-    else //"A1, A2, A4"
+    else //"A1, A2, A4, AE"
         {
             //IOstate changing need
             //go next command

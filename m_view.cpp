@@ -12,7 +12,7 @@ m_view::~m_view()
 
 std::vector<std::string> m_view::split_answer(const std::string& answer)
 {
-    //if(!is_valid_answer(answer)) { std::cerr <<'\n'<< answer <<'\n';}
+    //validation of answer tests later in other class
     smatch sm;
     auto command_name = std::string(answer.substr(0,2));
     if(     command_name == "A0" )

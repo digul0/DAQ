@@ -59,27 +59,27 @@ using namespace std;
 
 int main()
 {
+    ///global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
-    //vector<Settings::settings_struct>
-    //Port Position Receptacle Temperature
-// TODO (testuser#1#): make exeption or <optional>
-    auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
     auto now_time_point = std::chrono::system_clock::now();
 
-    /** Main process
+    ///read settings
+    auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
+
+    /** Main thread process
     */
     auto process = [&global_results_storage](auto ss)
     {
-        //settings
-        m_model m (ss); //throw ex. here - abort! Fix it!
-        m_view v;
-        m_controller c(ss);
-
-        c.setModel(&m);
-        c.setView(&v);
-
         try
             {
+                m_model m (ss);
+                m_view v;
+                m_controller c(ss);
+
+                c.setModel(&m);
+                c.setView(&v);
+
+
 
                 c.acqure_temperature();
                 if (c.test_temperature())
@@ -90,7 +90,16 @@ int main()
                     {
                         c.acqure_25();
                     }
+                //thread-safe writing from local_results_storage to global_results_storage
+                static mutex global_storage_mutex;
+                {
+                    unique_lock<mutex> ul(global_storage_mutex);
+                    auto local_results_storage = c.get_local_results_storage();
+                    std::move(local_results_storage.begin(),
+                              local_results_storage.end(),
+                              back_insert_iterator(global_results_storage));
 
+                }
             }
         catch (const exception& ex)
             {
@@ -98,25 +107,9 @@ int main()
                 //closing thread only
                 //TODO adequate err handler
                 m_log()<< ex.what() << '\n';
+                //any exception lead to exit thread
                 return ;
             }
-
-        static mutex global_storage_mutex;
-        {
-            unique_lock<mutex> ul(global_storage_mutex);
-            auto local_results_storage = c.get_local_results_storage();
-            std::move(local_results_storage.begin(),
-                      local_results_storage.end(),
-                      back_insert_iterator(global_results_storage));
-
-        }
-
-        /*
-        //TODO handle exit
-        m.choose_commands_pool(m_model::CommandsPoolName::switch_up);
-        c.do_branch();
-        */
-        return ;
     };
 
     /** Threads launch
@@ -135,15 +128,16 @@ int main()
     //sort by position
     sort(global_results_storage.begin(), global_results_storage.end(),
          [](m_controller::ResultsStorage& value1, m_controller::ResultsStorage& value2)
-    {
-        return value1.Position < value2.Position;
-    }
+            {
+              return value1.Position < value2.Position;
+            }
         );
     //
     auto log_name = m_log::make_name_from_time(now_time_point);
     ofstream out (log_name);//, ofstream::trunc);
     /** Printing to log
     */
+    ///log header
     out << "Position" << " "
         "Serial" << " "
         "I_SLD_SET" << " "
@@ -157,6 +151,8 @@ int main()
         "PD_INT_error" << " "
         "PD_EXT_average" << " "
         "PD_EXT_error" << '\n';
+
+    ///log of measurments
     for (size_t i = 0; i < global_results_storage.size(); i++)
         {
             out << setprecision(3) << fixed << showpoint
@@ -175,18 +171,5 @@ int main()
                 << global_results_storage[i].PD_EXT_error << " "
                 << '\n';
         }
-    /*
-        for (size_t i = 0; i < global_results_storage.size(); i++)
-            {
-                out << setprecision(3) << fixed << showpoint
-                    << global_results_storage[i].Position << " "
-                    << global_results_storage[i].Serial << " "
-                    << global_results_storage[i].PD_INT_average << " "
-                    << setprecision(1)
-                    << global_results_storage[i].I_SLD_REAL << " "
-                    << global_results_storage[i].T_REAL << " "
-                    << '\n';
-            } //TODO show that
-    */
     return 0;
 }
