@@ -5,26 +5,26 @@
 
 
 //forward declarations
-namespace Settings{
-  class settings_struct;
-}
 class m_model;
 class m_view;
-//
+namespace Settings
+{
+class settings_struct;
+}
 
 class m_controller
 {
-  /**
-   *  @brief  Provide application main logic
-   *
-   *  Contains com-port aquicition algorithms,
-   *  provided by model interface; answer analyse;
-   *  error handle; output data formation.
-   */
+    /**
+    * @brief
+    * Обеспечивает основную логику приложения: управление алгоритмом опроса com-порта с помощью интерфейса
+    * модели, анализ поступивших ответов, обработка ошибок и формирование массива выходных данных.
+    * Provides the main application logic: control of the com-port polling algorithm using the model interface,
+    * analysis of incoming responses, error handling and generation of an output data.
+    */
 public:
     explicit m_controller(const Settings::settings_struct& ss);
     m_controller(const m_controller&) = delete;
-	  m_controller& operator=(const m_controller&) = delete;
+    m_controller& operator=(const m_controller&) = delete;
     ~m_controller();
 
     /** MVC interface functions*/

@@ -7,14 +7,20 @@
 //forward declarations
 namespace Settings
 {
-    class settings_struct;
+class settings_struct;
 }
 class m_open_port;
 
 
 class m_model
 {
-    /** typedef block */
+    /**
+    * @brief
+    * Обеспечивает интерфейс для выбора и исполнения предварительно скомпилированного
+    * потока команд, а так же получения ответа от com-порта.
+    * Provides an interface for selecting and executing a precompiled command flow,
+    * as well as receiving a response from the com port.
+    */
 private:
     using command_impl_type = std::string;
     using answer_imp_type   = command_impl_type;
@@ -36,8 +42,6 @@ public:
     m_model(const m_model&) = delete;
     m_model& operator=(const m_model&) = delete;
     ~m_model();// = default;
-
-
 
     /** Struct contained list of aviable commands for IO*/
 public:
@@ -91,7 +95,5 @@ private:
     commands_sequence::iterator  _current_command_seq_it;
     answer_imp_type              _answer;
     bool                         _end_of_branch{false};
-
-
 };
 #endif // M_MODEL_H

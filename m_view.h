@@ -8,14 +8,19 @@ using boost::regex, boost::sregex_iterator, boost::regex, boost::smatch;
 using std::regex, std::sregex_iterator, std::regex, std::smatch;
 #endif // HAS_BOOST
 
-//#include <boost/regex.hpp>
-
 //forward declarations
 class m_model;
 class m_controller;
 
 class m_view
 {
+  /**
+  * @brief
+  *  Обеспечивает валидацию ответа и разбиению цельного ответа на составляющие
+  * согласно заданному регулярному шаблону
+  * Provides validation of the response and splitting a complete response
+  * to the components according to a specified regular expressions.
+  */
 public:
     m_view();
     ~m_view();

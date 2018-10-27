@@ -37,7 +37,7 @@ SettingsParser::get_settings_struct(const string & _portmap_ini_name,
                                          (*it).str(2),
                                          stoi((*it).str(3)),
                                          stoi((*it).str(4))};
-                    name_to_com_table.emplace( (*it).str(2), s);
+                    name_to_com_table.emplace( (*it).str(2), std::move(s));
                 }
         }
     //Port Position Port
