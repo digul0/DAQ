@@ -56,16 +56,29 @@ Refactoring
 //обработка ошибок
 //механизм аварийного завершение потоков
 using namespace std;
-
+void foo()
+{
+    this_thread::sleep_for(5s);
+};
+//Uiliams page. 416
 int main()
 {
+    //atexit (foo);
     ///global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
     auto now_time_point = std::chrono::system_clock::now();
 
     ///read settings
+    try
+        {
+            auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
+        }
+    catch(exception& ex)
+        {
+            m_log()<< ex.what() <<'\n';
+            return -1;
+        }
     auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
-
     /** Main thread process
     */
     auto process = [&global_results_storage](auto ss)
@@ -78,9 +91,7 @@ int main()
 
                 c.setModel(&m);
                 c.setView(&v);
-
-
-
+//throw m_exception_inf("goodbye!");
                 c.acqure_temperature();
                 if (c.test_temperature())
                     {
@@ -98,17 +109,13 @@ int main()
                     std::move(local_results_storage.begin(),
                               local_results_storage.end(),
                               back_insert_iterator(global_results_storage));
-
                 }
             }
-        catch (const exception& ex)
+        catch (exception& ex)
             {
-
-                //closing thread only
-                //TODO adequate err handler
-                m_log()<< ex.what() << '\n';
                 //any exception lead to exit thread
-                return ;
+                m_log()<< ex.what() << '\n';
+                return;
             }
     };
 
@@ -128,9 +135,9 @@ int main()
     //sort by position
     sort(global_results_storage.begin(), global_results_storage.end(),
          [](m_controller::ResultsStorage& value1, m_controller::ResultsStorage& value2)
-            {
-              return value1.Position < value2.Position;
-            }
+    {
+        return value1.Position < value2.Position;
+    }
         );
     //
     auto log_name = m_log::make_name_from_time(now_time_point);

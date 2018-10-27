@@ -40,7 +40,7 @@ public:
 
 
     /** Struct contained list of aviable commands for IO*/
-private:
+public:
     struct _commands_list
     {
         command_impl_type

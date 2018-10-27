@@ -17,7 +17,11 @@ m_controller::m_controller(const Settings::settings_struct& ss):
     _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions) ))
 {
 }
-m_controller::~m_controller() = default;
+m_controller::~m_controller()
+{
+  std::this_thread::sleep_for(_delay);
+  single_command_execute(model->commands_list.switch_55);
+}// = default;
 
 void m_controller::setView(m_view* _view)
 {
@@ -32,8 +36,10 @@ void m_controller::do_branch()
 {
     while(!model->end_commands())
         {
+            //init try_counter for each command
             size_t try_counter = 0;
             string answer ;
+
             //Handler of invalid answer event
             do
                 {
@@ -41,15 +47,11 @@ void m_controller::do_branch()
                         {
                             throw m_exception_inf("IO error: try counter > 3");
                         }
-
-
                     model->execute_current_command();
                     std::this_thread::sleep_for(_delay);
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
-
-
 
             auto res = view->split_answer(answer);
             parse_and_push_into_result(res);
@@ -176,7 +178,7 @@ m_controller::get_local_results_storage()
 {
     return _local_results_storage;
 }
-void single_command_execute(const string& command)
+void m_controller::single_command_execute(const string& command)
 {
-  //model->
+  model->execute_single_command(command);
 }

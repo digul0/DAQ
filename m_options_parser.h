@@ -30,17 +30,7 @@ public:
     SettingsReader( const SettingsReader& )  =  delete;
     enum class have_header
     {    have,    no_have  };
-
-    string read_settings_to_whole_string(have_header h = have_header::no_have) const
-    {
-      if (_f.bad()) throw m_exception_inf(std::string(_filename) + " file not exist!");
-        stringstream s;
-        //skip settings header
-        if ( h == have_header::have )
-            _f.ignore(numeric_limits<streamsize>::max(),'\n');
-        s << _f.rdbuf();
-        return s.str();
-    }
+    string read_settings_to_whole_string(have_header h = have_header::no_have) const;
 };
 
 
