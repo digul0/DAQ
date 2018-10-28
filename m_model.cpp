@@ -1,6 +1,6 @@
 #include "m_model.h"
 #include "m_options_parser.h"
-#include "m_open_port.hpp"
+#include "m_open_port.h"
 
 using namespace std::chrono_literals;
 m_model::m_model(const Settings::settings_struct& ss)

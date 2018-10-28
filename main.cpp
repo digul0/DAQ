@@ -6,21 +6,25 @@
 #include "m_view.h"
 #include "m_controller.h"
 #include "m_options_parser.h"
-#include "m_log.hpp"
+#include "m_log.h"
 
 //TODO
 //действия на abort()
 //atexit((void*)foo) работает
 //механизм аварийного завершение потоков
 using namespace std;
-void foo()
+
+static atomic<bool> stop_thread_flag{false};
+void exit_callback_foo()
 {
+    stop_thread_flag.store(true);
     this_thread::sleep_for(5s);
-};
+}
+
 //Uiliams page. 416
 int main()
 {
-    //atexit (foo);
+    //
     ///global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
     auto now_time_point = std::chrono::system_clock::now();
@@ -36,16 +40,20 @@ int main()
             return -1;
         }
     auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
+    //for emergency exit()
+    atexit (exit_callback_foo);
     /** Main thread process
     */
-    auto process = [&global_results_storage](auto ss)
+    auto process = [&global_results_storage, &stop_thread_flag](auto ss)
     {
         try
             {
+              //do not brake init order: model, view, controller
                 m_model m (ss);
                 m_view v;
                 m_controller c(ss);
-
+              //
+                c.setInterruptFlag(&stop_thread_flag);
                 c.setModel(&m);
                 c.setView(&v);
 //throw m_exception_inf("goodbye!");

@@ -5,7 +5,7 @@
 #include "m_controller.h"
 #include "m_model.h" //!!!
 #include "m_view.h"
-#include "m_log.hpp"
+#include "m_log.h"
 #include "m_options_parser.h"
 
 using namespace std::chrono_literals;
@@ -21,6 +21,8 @@ m_controller::~m_controller()
 {
   std::this_thread::sleep_for(_delay);
   single_command_execute(model->commands_list.switch_55);
+  std::this_thread::sleep_for(_delay);
+  single_command_execute(model->commands_list.go_1);
 }// = default;
 
 void m_controller::setView(m_view* _view)
@@ -30,6 +32,10 @@ void m_controller::setView(m_view* _view)
 void m_controller::setModel(m_model* _model)
 {
     model = _model;
+}
+void m_controller::setInterruptFlag(std::atomic<bool>* interrupt_flag)
+{
+  _stop_thread_flag_pointer = interrupt_flag;
 }
 
 void m_controller::do_branch()
@@ -52,6 +58,11 @@ void m_controller::do_branch()
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
+            /** ugly hook but it sufficient for simplify the code.
+              *
+              */
+            if (_stop_thread_flag_pointer!=nullptr && _stop_thread_flag_pointer->load())  //global atomic variable from main thread
+              throw m_exception_inf("Emergency interrupt");
 
             auto res = view->split_answer(answer);
             parse_and_push_into_result(res);

@@ -30,6 +30,7 @@ public:
     /** MVC interface functions*/
     void setView(m_view* _view);
     void setModel(m_model* _model);
+    void setInterruptFlag(std::atomic<bool>* interrupt_flag);
 public:
     struct ResultsStorage
     {
@@ -82,6 +83,6 @@ private:
     std::chrono::milliseconds   _delay;
     constexpr static size_t     _num_of_positions  {8} ; //Device channels constant
     std::vector<ResultsStorage> _local_results_storage;
-
+    std::atomic<bool>*          _stop_thread_flag_pointer{nullptr};
 };
 #endif // M_CONTROLLER_H

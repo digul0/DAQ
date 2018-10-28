@@ -1,9 +1,9 @@
 #include <algorithm>
-#include "m_open_port.hpp"
+#include "m_open_port.h"
 
 #define OPEN_CLOSE_LOG_ON
 #ifdef OPEN_CLOSE_LOG_ON
-#include "m_log.hpp"
+#include "m_log.h"
 #endif // OPEN_CLOSE_LOG_ON
 
 using namespace std::chrono_literals;
