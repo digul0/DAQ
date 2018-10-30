@@ -68,7 +68,8 @@ public:
 
     void parse_and_push_into_result(std::vector<std::string> res);
     std::vector<ResultsStorage> get_local_results_storage();
-
+    template <typename Time_duration, typename Call>
+    friend  void sleep_for_with_condition(Time_duration t, Call foo);
 private:
     /** MVC members*/
     m_view* view;

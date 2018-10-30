@@ -8,22 +8,36 @@
 #include "m_options_parser.h"
 #include "m_log.h"
 
-//TODO
-//действия на abort()
-//atexit((void*)foo) работает
-//механизм аварийного завершение потоков
-using namespace std;
+#include "windows.h"
 
+using namespace std;
+//signal flag for exit prepare
 static atomic<bool> stop_thread_flag{false};
-void exit_callback_foo()
+int lock_ctrl_keys_exit(DWORD event_id)
 {
-    stop_thread_flag.store(true);
-    this_thread::sleep_for(5s);
+  using namespace std::chrono_literals;
+  auto delay_before_exit = 4s;
+    switch (event_id)
+        {
+        case CTRL_C_EVENT: case CTRL_BREAK_EVENT: case CTRL_CLOSE_EVENT:
+          case CTRL_LOGOFF_EVENT: case CTRL_SHUTDOWN_EVENT:
+        {
+            stop_thread_flag.store(true);
+            std::this_thread::sleep_for(delay_before_exit);
+            return false;
+            break;
+        }
+        default:
+            {
+              return false;
+            }
+        }
 }
 
 //Uiliams page. 416
 int main()
 {
+
     //
     ///global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
@@ -41,7 +55,8 @@ int main()
         }
     auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
     //for emergency exit()
-    atexit (exit_callback_foo);
+    SetConsoleCtrlHandler(lock_ctrl_keys_exit,true);
+    //atexit (exit_callback_foo);
     /** Main thread process
     */
     auto process = [&global_results_storage, &stop_thread_flag](auto ss)

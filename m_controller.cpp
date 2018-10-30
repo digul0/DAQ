@@ -17,8 +17,13 @@ m_controller::m_controller(const Settings::settings_struct& ss):
     _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions) ))
 {
 }
+//  Obtain emergency exit for any close console events.
+//  Do not add in m_controller::~m_controller()commands
+//  with total duration > delay_before_exit value
+//  in lock_ctrl_keys_exit(DWORD event_id)
 m_controller::~m_controller()
 {
+
   std::this_thread::sleep_for(_delay);
   single_command_execute(model->commands_list.switch_55);
   std::this_thread::sleep_for(_delay);
@@ -167,14 +172,29 @@ void m_controller::acqure_25()
     model->choose_commands_pool(m_model::CommandsPoolName::acqure_25);
     do_branch();
 }
-//остается переключенным на +25 если оборвать опрос - bug!
+
+//for interrupted sleep
+template <typename Time_duration, typename Call>
+void sleep_for_with_condition(Time_duration t, Call foo)
+{
+    auto now_time = std::chrono::steady_clock::now();
+    while( !foo() && (std::chrono::steady_clock::now() - now_time < t) )
+    {
+      std::this_thread::sleep_for(500ms);
+    }
+}
 void m_controller::acqure_55()
 {
     model->choose_commands_pool(m_model::CommandsPoolName::switch_down);
     do_branch();
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
     //Wait while temperature balanced.
-    std::this_thread::sleep_for(60s);
+    //std::this_thread::sleep_for(60s);.
+    sleep_for_with_condition(60s, [self = this]()
+                             {
+                               return self->_stop_thread_flag_pointer->load();
+                             }
+                             );
     acqure_25();
     model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
     do_branch();
