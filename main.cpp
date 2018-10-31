@@ -49,6 +49,7 @@ int main()
                 m_view v;
                 m_controller c(ss);
               //
+                v.setModel(&m);
                 c.setInterruptFlag(&stop_thread_flag);
                 c.setModel(&m);
                 c.setView(&v);

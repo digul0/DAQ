@@ -2,15 +2,13 @@
 #define M_VIEW_H
 
 #include "common_std_headers.h"
+
 #ifdef HAS_BOOST
 using boost::regex, boost::sregex_iterator, boost::regex, boost::smatch;
 #else
 using std::regex, std::sregex_iterator, std::regex, std::smatch;
 #endif // HAS_BOOST
-
-//forward declarations
 class m_model;
-class m_controller;
 
 class m_view
 {
@@ -26,10 +24,13 @@ public:
     ~m_view();
     m_view(const m_view&) = delete;
     m_view& operator=(const m_view&) = delete;
+public:
+    setModel(m_model* model);
 
 public:
     /** Parse answer functions */
     bool is_valid_answer(const std::string& answer);
+    bool is_regex_compatible_answer(const std::string& answer);
     std::vector<std::string> split_answer(const std::string& answer);
 
 private:
@@ -54,7 +55,7 @@ private:
     regex S4{"A4"                           "(\\d{1})"};
                   // ^^                               ^^
                   // A4                               temperature_mode
-
+    m_model* model;
 
 };
 #endif // M_VIEW_H
