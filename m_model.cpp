@@ -175,7 +175,7 @@ void m_model::choose_commands_pool(CommandsPoolName choose)
     _current_command_seq_it =   _current_commands_sequence->begin();
     check_end();
 }
-const bool  m_model::end_commands ()
+bool  m_model::end_commands ()
 {
     return _end_of_branch;
 }

@@ -34,14 +34,14 @@ public:
     void write_raw(const std::string& command);
     std::string read_raw ();//?
     const std::string get_portNum() const ;
-    const HANDLE getPortHwd() const; //typedef void HANDLE; (???!!)
+    HANDLE getPortHwd() const; //typedef void HANDLE; (???!!)
     void flushPort();
 
 private:
     bool open ();
     void init();
     void close();
-    const bool is_valid() const; // virtual com port checking only, not device!
+    bool is_valid() const; // virtual com port checking only, not device!
 
 private:
     unsigned int _num_of_port;

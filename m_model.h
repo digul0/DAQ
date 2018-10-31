@@ -78,7 +78,7 @@ public:
     void execute_current_command ();
     answer_imp_type  read_answer() ;
     void go_next_command();
-    const bool end_commands ();
+    bool end_commands ();
     const answer_imp_type get_current_command();
     const answer_imp_type get_current_answer();
 private:

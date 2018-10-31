@@ -15,7 +15,7 @@ using std::atomic;
 m_open_port::m_open_port(unsigned int numPort):
     _num_of_port(numPort),
     _port_init_string("\\\\.\\COM"),
-    hComPort(0),
+    hComPort(nullptr),
     _failure(true)
     //_m(nullptr)
 {
@@ -29,10 +29,10 @@ m_open_port::~m_open_port()
 }
 bool m_open_port::open()
 {
-    if( hComPort ==  0 )
+    if( hComPort ==  nullptr )
         {
             const char *full_com_name = (_port_init_string + std::to_string(_num_of_port)).c_str();
-            hComPort = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING,/*FILE_FLAG_OVERLAPPED*/0, 0);
+            hComPort = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE, 0, nullptr, OPEN_EXISTING,/*FILE_FLAG_OVERLAPPED*/0, nullptr);
             _failure = (hComPort == INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
             if (!_failure)
@@ -81,7 +81,7 @@ void m_open_port::close()
         {
             CloseHandle(hComPort); ///так себе вообщения
             _failure = true;
-            hComPort = 0;
+            hComPort = nullptr;
 #ifdef OPEN_CLOSE_LOG_ON
             m_log() << "Port COM" << _num_of_port << " closed!" << '\n';
 #endif // OPEN_CLOSE_LOG_ON
@@ -101,10 +101,10 @@ void m_open_port::write_raw(const std::string& command)
     flushPort();
     // split into 2 write operations
     //Send command string with null-terminator
-    WriteFile(hComPort, command.data(), command.size() + 1, &bytes_written, 0);
+    WriteFile(hComPort, command.data(), command.size() + 1, &bytes_written, nullptr);
     //                                                    ^^ + null-terminator
     //Send CRLF string without null-terminator
-    WriteFile(hComPort, CRLF, sizeof(CRLF) - 1, &bytes_written, 0);
+    WriteFile(hComPort, CRLF, sizeof(CRLF) - 1, &bytes_written, nullptr);
     //                                      ^^ - null-terminator
     return ;
 }
@@ -117,7 +117,7 @@ string m_open_port::read_raw()
     char buf[30]      = {};
     DWORD sz_buf = sizeof(buf)/sizeof(*buf);
     constexpr char CRLF[] = "\r\n";
-    ReadFile (hComPort, buf, sz_buf, &bytes_read, 0);
+    ReadFile (hComPort, buf, sz_buf, &bytes_read, nullptr);
     auto findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
     size_t temp_br = bytes_read;
 
@@ -125,7 +125,7 @@ string m_open_port::read_raw()
         {
             std::this_thread::sleep_for(100ms);
 
-            ReadFile (hComPort, &buf[temp_br], sz_buf, &bytes_read, 0); //resume reading, to &buf[bytes_read]
+            ReadFile (hComPort, &buf[temp_br], sz_buf, &bytes_read, nullptr); //resume reading, to &buf[bytes_read]
             temp_br+= bytes_read;
             findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
             if (try_counter > 3)
@@ -142,11 +142,11 @@ string m_open_port::read_raw()
 
     return r;
 }
-const bool m_open_port::is_valid() const
+bool m_open_port::is_valid() const
 {
     return !_failure;
 }
-const HANDLE m_open_port::getPortHwd() const
+HANDLE m_open_port::getPortHwd() const
 {
     return hComPort;
 }

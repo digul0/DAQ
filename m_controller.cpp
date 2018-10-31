@@ -17,13 +17,12 @@ m_controller::m_controller(const Settings::settings_struct& ss):
     _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions) ))
 {
 }
-//  Obtain emergency exit for any close console events.
-//  Do not add in m_controller::~m_controller()commands
+//  Destructor provide emergency exit for any close console events.
+//  Do not add in m_controller::~m_controller() commands
 //  with total duration > delay_before_exit value
 //  in lock_ctrl_keys_exit(DWORD event_id)
 m_controller::~m_controller()
 {
-
   std::this_thread::sleep_for(_delay);
   single_command_execute(model->commands_list.switch_55);
   std::this_thread::sleep_for(_delay);
@@ -63,7 +62,7 @@ void m_controller::do_branch()
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
-            /** ugly hook but it sufficient for simplify the code.
+            /** ugly sufficient hook but it for simplify the code.
               *
               */
             if (_stop_thread_flag_pointer!=nullptr && _stop_thread_flag_pointer->load())  //global atomic variable from main thread
