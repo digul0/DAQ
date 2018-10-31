@@ -7,7 +7,7 @@
 //forward declarations
 namespace Settings
 {
-class settings_struct;
+    struct settings_struct;
 }
 class m_open_port;
 

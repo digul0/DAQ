@@ -13,7 +13,7 @@
 using namespace std;
 //signal flag for exit prepare
 static atomic<bool> stop_thread_flag{false};
-int lock_ctrl_keys_exit(DWORD event_id);
+BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id);
 
 //Uiliams page. 416
 int main()
@@ -142,7 +142,7 @@ int main()
         }
     return 0;
 }
-int lock_ctrl_keys_exit(DWORD event_id)
+BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
 {
   using namespace std::chrono_literals;
   auto delay_before_exit = 4s;

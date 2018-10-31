@@ -25,7 +25,7 @@ public:
     m_view(const m_view&) = delete;
     m_view& operator=(const m_view&) = delete;
 public:
-    setModel(m_model* model);
+    void setModel(m_model* model);
 
 public:
     /** Parse answer functions */
@@ -55,7 +55,7 @@ private:
     regex S4{"A4"                           "(\\d{1})"};
                   // ^^                               ^^
                   // A4                               temperature_mode
-    m_model* model;
+    m_model* _model;
 
 };
 #endif // M_VIEW_H

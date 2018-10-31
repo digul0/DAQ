@@ -9,7 +9,7 @@ class m_model;
 class m_view;
 namespace Settings
 {
-class settings_struct;
+    struct settings_struct;
 }
 
 class m_controller

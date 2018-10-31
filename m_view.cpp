@@ -10,6 +10,11 @@ m_view::~m_view()
     //dtor
 }
 
+void m_view::setModel(m_model * model)
+{
+	_model = model;
+}
+
 std::vector<std::string> m_view::split_answer(const std::string& answer)
 {
     //validation of answer tests later in other class
@@ -70,7 +75,7 @@ bool m_view::is_valid_answer(const std::string& answer)
 //  maybe not good idea
 bool m_view::is_regex_compatible_answer(const std::string& answer)
 {
-  auto command = model->get_current_command().substr(0,2);
+  auto command = _model->get_current_command().substr(0,2);
   auto command_key = std::move(command.substr(0,2));
     if(     command_key == "S0" )
         {
