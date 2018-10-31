@@ -52,7 +52,7 @@ int main()
                 c.setInterruptFlag(&stop_thread_flag);
                 c.setModel(&m);
                 c.setView(&v);
-//throw m_exception_inf("goodbye!");
+//throw logic_error("goodbye!");
                 c.acqure_temperature();
                 if (c.test_temperature())
                     {

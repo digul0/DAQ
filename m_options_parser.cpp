@@ -65,7 +65,7 @@ SettingsParser::get_settings_struct(const string & _portmap_ini_name,
 string SettingsReader::read_settings_to_whole_string(have_header h) const
 {
     if (!_f.is_open())
-        throw m_exception_inf(std::string(_filename) + " file not exist!");
+        throw logic_error(std::string(_filename) + " file not exist!");
     stringstream s;
     //skip settings header
     if ( h == have_header::have )

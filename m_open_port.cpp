@@ -10,6 +10,7 @@ using namespace std::chrono_literals;
 using std::string;
 using std::mutex;
 using std::atomic;
+using std::logic_error;
 
 ///Construct m_open_port
 m_open_port::m_open_port(unsigned int numPort):
@@ -41,7 +42,7 @@ bool m_open_port::open()
             if (_failure)
                 {
                     //++m_log::_failure_to_open_port_Counter;
-                    throw m_exception_inf(string("IO error: Can't open port: COM") + std::to_string(_num_of_port)) ;
+                    throw logic_error(string("IO error: Can't open port: COM") + std::to_string(_num_of_port)) ;
                 }
         }
     return !_failure;

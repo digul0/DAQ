@@ -10,6 +10,7 @@
 
 using namespace std::chrono_literals;
 using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
+using std::logic_error;
 
 m_controller::m_controller(const Settings::settings_struct& ss):
     _block_place(ss.position), _temperature_mode(ss.temperature_mode), _receptacle(ss.receptacle),
@@ -55,7 +56,7 @@ void m_controller::do_branch()
                 {
                     if (++try_counter > 3)
                         {
-                            throw m_exception_inf("IO error: try counter > 3");
+                            throw logic_error("IO error: try counter > 3");
                         }
                     model->execute_current_command();
                     std::this_thread::sleep_for(_delay);
@@ -66,7 +67,7 @@ void m_controller::do_branch()
               *
               */
             if (_stop_thread_flag_pointer!=nullptr && _stop_thread_flag_pointer->load())  //global atomic variable from main thread
-              throw m_exception_inf("Emergency interrupt");
+              throw logic_error("Emergency interrupt");
 
             auto res = view->split_answer(answer);
             parse_and_push_into_result(res);

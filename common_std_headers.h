@@ -24,6 +24,4 @@
   #include <regex>
 #endif // HAS_BOOST
 
-//for exceptions with info
-#include "m_exception_inf.h"
 #endif // COMMON_STD_HEADERS_HPP_INCLUDED
