@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
 project(DAQ)
 file(GLOB HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h") 
 file(GLOB SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp") 
@@ -10,15 +10,22 @@ set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 #my boost compiled by older version mingw 
-set(Boost_COMPILER "-mgw73")
-#only x64 or x86 systems
-if (NOT CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
-    set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x64") #TODO: fix it!
+#comment the next string using "#" if boost was buid using current compiler.
+#set(Boost_COMPILER "-mgw73")
+if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+  set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x64")
+else()
+  set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x32")
 endif()
-#message (STATUS "Kuku ${CMAKE_SIZEOF_VOID_P}")
-find_package(Boost COMPONENTS regex) #REQUIRED)
+
+#if notfound use std::regex
+find_package(Boost COMPONENTS regex) #REQUIRED
 if (${Boost_FOUND})
   add_definitions("-DHAS_BOOST")
-  include_directories(${Boost_INCLUDE_DIRS})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
- endif()
+endif()
+ #DAQ is not crossplatform, WIN32 only. Yet.
+if(NOT ${WIN32})
+  message (WARNING  "DAQ is not crossplatform, WIN32 only. Yet.")
+endif()
