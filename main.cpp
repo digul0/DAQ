@@ -55,11 +55,11 @@ int main()
                 c.acqure_temperature();
                 if (c.test_temperature())
                     {
-                        c.acqure_55();
+                        c.acquire_55();
                     }
                 else
                     {
-                        c.acqure_25();
+                        c.acquire_25();
                     }
                 //thread-safe writing from local_results_storage to global_results_storage
                 static mutex global_storage_mutex;

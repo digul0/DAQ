@@ -24,26 +24,28 @@ m_controller::m_controller(const Settings::settings_struct& ss):
 //  in lock_ctrl_keys_exit(DWORD event_id)
 m_controller::~m_controller()
 {
-  std::this_thread::sleep_for(_delay);
-  single_command_execute(model->commands_list.switch_55);
-  std::this_thread::sleep_for(_delay);
-  single_command_execute(model->commands_list.go_1);
+    std::this_thread::sleep_for(_delay);
+    single_command_execute(model->commands_list.switch_55);
+    std::this_thread::sleep_for(_delay);
+    single_command_execute(model->commands_list.go_1);
 }
 
 void m_controller::setView(m_view* _view)
 {
     view = _view;
 }
+
 void m_controller::setModel(m_model* _model)
 {
     model = _model;
 }
+
 void m_controller::setInterruptFlag(std::atomic<bool>* interrupt_flag)
 {
-  _stop_thread_flag_pointer = interrupt_flag;
+    _stop_thread_flag_pointer = interrupt_flag;
 }
 
-void m_controller::do_branch()
+void m_controller::do_branch_full()
 {
     while(!model->end_commands())
         {
@@ -67,31 +69,36 @@ void m_controller::do_branch()
               *
               */
             if (_stop_thread_flag_pointer!=nullptr &&
-                _stop_thread_flag_pointer->load())  //global atomic variable from main thread
-              throw logic_error("Emergency interrupt");
+                    _stop_thread_flag_pointer->load())  //global atomic variable from main thread
+                throw logic_error("Emergency interrupt");
 
-            auto res = view->split_answer(answer);
-            parse_and_push_into_result(res);
+            auto splited_answer = view->split_answer(answer);
+            _miniIOstate.state_changer(splited_answer); //debug
+            m_log() << _miniIOstate.current_channel_number
+                  << _miniIOstate.current_mode
+                  << _miniIOstate.temp_was_switched
+                  << '\n'; //debug
+            parse_and_push_into_result(splited_answer);
             m_log() << model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
             model->go_next_command();
             std::this_thread::sleep_for(_delay);
         }
 }
-void m_controller::parse_and_push_into_result(vector<string> res)
+void m_controller::parse_and_push_into_result(const vector<string> splited_answer)
 {
     auto from_Ohm_to_T = [](double Ohm)
     {
-      ///allowed thermoresistor resistance value range in Ohm
+        ///allowed thermoresistor resistance value range in Ohm
         if ((Ohm < 600) || (Ohm > 20000))
             return -273.15;
         return (-26.19*std::log(Ohm) + 265.7 ); //empiric formula
     };
 
     enum { SET = 1, REAL = 2};
-    auto command_name = res[0];
+    auto command_name = splited_answer[0];
     if (command_name == "A0")
         {
-            auto serial = res[4];
+            auto serial = splited_answer[4];
             for (size_t i = 0; i < 8 ; ++i )
                 {
                     _local_results_storage[i].Serial = serial;
@@ -102,10 +109,10 @@ void m_controller::parse_and_push_into_result(vector<string> res)
     else if (command_name == "A3")
         {
 
-            int param_num      = std::stoi(res[1]);
-            int ch_number      = std::stoi(res[2]) - 1; // 0
-            int mode           = std::stoi(res[3]);
-            double measured_data  = std::stod(res[4]);
+            int param_num      = std::stoi(splited_answer[1]);
+            int ch_number      = std::stoi(splited_answer[2]) - 1; // 0
+            int mode           = std::stoi(splited_answer[3]);
+            double measured_data  = std::stod(splited_answer[4]);
             if (mode == SET)
                 {
                     if      (param_num == 1)
@@ -149,8 +156,10 @@ void m_controller::acqure_temperature()
 {
     //delay = 500ms;
     model->choose_commands_pool(m_model::CommandsPoolName::acqure_temperature);
-    do_branch();
+    do_branch_full();
 }
+
+//don't run before acqure_temperature()
 bool m_controller::test_temperature()
 {
     enum {TEMP_MODE_DEFAULT = 0, TEMP_MODE_NOSWITCH = 1 };
@@ -159,19 +168,19 @@ bool m_controller::test_temperature()
     constexpr double deviance = 0.25 ; //%
     constexpr double ambient_temperature = 25.0;
 
-    bool res = false;
+    bool non_standart_temperature = false;
     for (size_t i = 0; i < _num_of_positions; ++i)
         {
             if ((_local_results_storage[i].T_SET > ambient_temperature *( 1 + deviance )) ||
                     (_local_results_storage[i].T_SET < ambient_temperature *( 1 - deviance )))
-                res = true;
+                non_standart_temperature = true;
         }
-    return res;
+    return non_standart_temperature;
 }
-void m_controller::acqure_25()
+void m_controller::acquire_25()
 {
-    model->choose_commands_pool(m_model::CommandsPoolName::acqure_25);
-    do_branch();
+    model->choose_commands_pool(m_model::CommandsPoolName::acquire_25);
+    do_branch_full();
 }
 
 //for interrupted sleep
@@ -180,25 +189,25 @@ void sleep_for_with_condition(Time_duration t, Call foo)
 {
     auto now_time = std::chrono::steady_clock::now();
     while( !foo() && (std::chrono::steady_clock::now() - now_time < t) )
-    {
-      std::this_thread::sleep_for(100ms);
-    }
+        {
+            std::this_thread::sleep_for(100ms);
+        }
 }
-void m_controller::acqure_55()
+void m_controller::acquire_55()
 {
     model->choose_commands_pool(m_model::CommandsPoolName::switch_down);
-    do_branch();
+    do_branch_full();
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
     //Wait while temperature balanced.
     //std::this_thread::sleep_for(60s);.
     sleep_for_with_condition(60s, [self = this]()
-                             {
-                               return self->_stop_thread_flag_pointer->load();
-                             }
-                             );
-    acqure_25();
+    {
+        return self->_stop_thread_flag_pointer->load();
+    }
+                            );
+    acquire_25();
     model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
-    do_branch();
+    do_branch_full();
 }
 void m_controller::experimental_measurements()
 {
@@ -212,5 +221,22 @@ m_controller::get_local_results_storage()
 }
 void m_controller::single_command_execute(const string& command)
 {
-  model->execute_single_command(command);
+    model->execute_single_command(command);
+}
+void m_controller::_MiniIOstate::state_changer(const vector<string> splited_answer)
+{
+    //look at model regex schema
+    const auto& command_name = splited_answer[0];
+    if (command_name == "A1")
+        {
+            current_channel_number = stoi(splited_answer[1]) - 1; //0
+        }
+    else if (command_name == "A2")
+        {
+            current_mode = stoi(splited_answer[1]);
+        }
+    else if (command_name == "A4")
+        {
+            temp_was_switched = true;
+        }
 }

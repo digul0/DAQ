@@ -51,22 +51,25 @@ public:
 private:
     struct _MiniIOstate //enums mb?
     {
-        int current_position;
+        int current_channel_number;
         int current_mode;
-        int current_temp;
-    };
+        bool temp_was_switched;
+
+        void state_changer(const std::vector<std::string> splited_answer);
+    } _miniIOstate {0,0,false};
+friend class m_controller::_MiniIOstate;
     /** interface functions*/
 public:
     void acqure_temperature();
-    void acqure_25();
-    void acqure_55();
+    void acquire_25();
+    void acquire_55();
     bool test_temperature();
     ///experimental
     void experimental_measurements();
-    void do_branch();
+    void do_branch_full();
     void single_command_execute(const std::string& command);
 
-    void parse_and_push_into_result(std::vector<std::string> res);
+    void parse_and_push_into_result(const std::vector<std::string> splited_answer);
     std::vector<ResultsStorage> get_local_results_storage();
     template <typename Time_duration, typename Call>
     friend  void sleep_for_with_condition(Time_duration t, Call foo);

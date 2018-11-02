@@ -45,7 +45,7 @@ void m_model::_commands_pool_init()
         commands_list.get_T,
         commands_list.go_1
     };
-    commands_sequence acqure_25 =
+    commands_sequence acquire_25 =
     {
         commands_list.switch_set,
         commands_list.go_1,
@@ -132,7 +132,7 @@ void m_model::_commands_pool_init()
     };
     //Strict adding order
     _commands_pool.push_back(std::move(test_t));
-    _commands_pool.push_back(std::move(acqure_25));
+    _commands_pool.push_back(std::move(acquire_25));
     _commands_pool.push_back(std::move(switch_up));
     _commands_pool.push_back(std::move(switch_down));
     _commands_pool.push_back(std::move(switch_to_default));
