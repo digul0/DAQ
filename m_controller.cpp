@@ -26,8 +26,12 @@ m_controller::~m_controller()
 {
     std::this_thread::sleep_for(_delay);
     single_command_execute(model->commands_list.switch_55);
-    std::this_thread::sleep_for(_delay);
-    single_command_execute(model->commands_list.go_1);
+    if(_miniIOstate.current_channel_number!= 1)
+    {
+        std::this_thread::sleep_for(_delay);
+        single_command_execute(model->commands_list.go_1);
+    }
+
 }
 
 void m_controller::setView(m_view* _view)
@@ -113,6 +117,10 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
             int ch_number      = std::stoi(splited_answer[2]) - 1; // 0
             int mode           = std::stoi(splited_answer[3]);
             double measured_data  = std::stod(splited_answer[4]);
+            if (_miniIOstate.current_channel_number!=ch_number ||
+                _miniIOstate.current_mode!=mode
+                ) throw logic_error(string("Don't push any buttons on the device ")
+                                    + _block_place + "\nwhile taking measurements!" );
             if (mode == SET)
                 {
                     if      (param_num == 1)
