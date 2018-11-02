@@ -25,6 +25,7 @@ public:
     m_view(const m_view&) = delete;
     m_view& operator=(const m_view&) = delete;
 public:
+  /** MVC interface functions*/
     void setModel(m_model* model);
 
 public:
@@ -56,6 +57,7 @@ private:
     regex S4{"A4"                           "(\\d{1})"};
                   // ^^                               ^^
                   // A4                               temperature_mode
+    /** MVC members*/
     m_model* _model;
 
 };

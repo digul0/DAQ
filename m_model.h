@@ -45,9 +45,9 @@ public:
 
     /** Struct contained list of aviable commands for IO*/
 public:
-    struct _commands_list
+    const struct _commands_list
     {
-        command_impl_type
+        const command_impl_type
         ask_name    = "S0",
         ask_posit   = "S10",
         go_1        = "S11",
@@ -82,8 +82,8 @@ public:
     const answer_imp_type get_current_command();
     const answer_imp_type get_current_answer();
 private:
-    void commands_pool_init();
-    void check_end();
+    void _commands_pool_init();
+    void _check_end();
     /** MVC interface functions*/
 
     /** state members*/

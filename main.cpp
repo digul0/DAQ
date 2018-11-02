@@ -18,8 +18,6 @@ BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id);
 //Uiliams page. 416
 int main()
 {
-
-    //
     ///global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
     auto now_time_point = std::chrono::system_clock::now();
@@ -37,7 +35,7 @@ int main()
     auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
     //for emergency exit()
     SetConsoleCtrlHandler(lock_ctrl_keys_exit,true);
-    //atexit (exit_callback_foo);
+
     /** Main thread process
     */
     auto process = [&global_results_storage/*, &stop_thread_flag*/](auto ss)
@@ -48,12 +46,12 @@ int main()
                 m_model m (ss);
                 m_view v;
                 m_controller c(ss);
-              //
+
                 v.setModel(&m);
                 c.setInterruptFlag(&stop_thread_flag);
                 c.setModel(&m);
                 c.setView(&v);
-//throw logic_error("goodbye!");
+
                 c.acqure_temperature();
                 if (c.test_temperature())
                     {
@@ -93,7 +91,7 @@ int main()
         {
             tr.join();
         }
-    //Wait threads finished
+    //Wait untile threads finished
     //sort by position
     sort(global_results_storage.begin(), global_results_storage.end(),
          [](m_controller::ResultsStorage& value1, m_controller::ResultsStorage& value2)
@@ -103,10 +101,10 @@ int main()
         );
     //
     auto log_name = m_log::make_name_from_time(now_time_point);
-    ofstream out (log_name);//, ofstream::trunc);
+    ofstream out (log_name);
     /** Printing to log
     */
-    ///log header
+    ///log table header
     out << "Position" << " "
         "Serial" << " "
         "I_SLD_SET" << " "
@@ -145,7 +143,7 @@ int main()
 BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
 {
   using namespace std::chrono_literals;
-  auto delay_before_exit = 4s;
+  auto delay_before_exit = 5s;
     switch (event_id)
         {
         case CTRL_C_EVENT: case CTRL_BREAK_EVENT: case CTRL_CLOSE_EVENT:
@@ -153,7 +151,6 @@ BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
         {
             stop_thread_flag.store(true); //tell all threads about exit
             std::this_thread::sleep_for(delay_before_exit);
-            return false;
             break;
         }
         default:
@@ -161,4 +158,5 @@ BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
               return false;
             }
         }
+  return false;
 }

@@ -28,7 +28,7 @@ m_controller::~m_controller()
   single_command_execute(model->commands_list.switch_55);
   std::this_thread::sleep_for(_delay);
   single_command_execute(model->commands_list.go_1);
-}// = default;
+}
 
 void m_controller::setView(m_view* _view)
 {
@@ -66,7 +66,8 @@ void m_controller::do_branch()
             /** ugly sufficient hook but it for simplify the code.
               *
               */
-            if (_stop_thread_flag_pointer!=nullptr && _stop_thread_flag_pointer->load())  //global atomic variable from main thread
+            if (_stop_thread_flag_pointer!=nullptr &&
+                _stop_thread_flag_pointer->load())  //global atomic variable from main thread
               throw logic_error("Emergency interrupt");
 
             auto res = view->split_answer(answer);
@@ -180,7 +181,7 @@ void sleep_for_with_condition(Time_duration t, Call foo)
     auto now_time = std::chrono::steady_clock::now();
     while( !foo() && (std::chrono::steady_clock::now() - now_time < t) )
     {
-      std::this_thread::sleep_for(500ms);
+      std::this_thread::sleep_for(100ms);
     }
 }
 void m_controller::acqure_55()

@@ -7,14 +7,14 @@ m_model::m_model(const Settings::settings_struct& ss)
     :_port(std::make_unique<m_open_port>(ss.port))
 
 {
-    commands_pool_init();
+    _commands_pool_init();
 }
 m_model::~m_model() = default;
 /**
   Commands sequenses
   Add new sequenses here
  */
-void m_model::commands_pool_init()
+void m_model::_commands_pool_init()
 {
     commands_sequence test_t =
     {
@@ -155,10 +155,10 @@ void m_model::go_next_command()
 
     if (!_end_of_branch)
         ++_current_command_seq_it;
-    check_end();
+    _check_end();
 
 }
-void m_model::check_end()
+void m_model::_check_end()
 {
     _end_of_branch = (_current_command_seq_it == _current_commands_sequence->end());
 }
@@ -173,7 +173,7 @@ void m_model::choose_commands_pool(CommandsPoolName choose)
 {
     _current_commands_sequence   =   &_commands_pool[static_cast<unsigned int> (choose)];
     _current_command_seq_it =   _current_commands_sequence->begin();
-    check_end();
+    _check_end();
 }
 bool  m_model::end_commands ()
 {
