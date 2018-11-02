@@ -10,9 +10,9 @@ m_view::~m_view()
     //dtor
 }
 
-void m_view::setModel(m_model * model)
+void m_view::setModel(m_model* model)
 {
-	_model = model;
+    _model = model;
 }
 
 std::vector<std::string> m_view::split_answer(const std::string& answer)
@@ -55,28 +55,35 @@ std::vector<std::string> m_view::split_answer(const std::string& answer)
         }
 }
 
-bool m_view::is_valid_answer(const std::string& answer)
+//answer.length <=10 and must satisfy "A\d{2,9}" or "AE"
+bool m_view::is_expected_answer(const std::string& answer)
 {
-    if (!answer.empty() && (answer.size()<=10) )
+    auto answer_size = answer.size();
+    if (answer_size > 2 && answer_size <=10)
         {
             if (answer[0] == 'A')
                 {
-                    return all_of(answer.cbegin() + 1, answer.cend(), //first any,  aka ".[\d|E]\d*" //AE is error
+                    return all_of(answer.cbegin() + 1, answer.cend(),
                                   [](const char ch)
                     {
-                        return (ch <= '9' && ch >= '0' ) || ( ch == 'E') ;
+                        return (ch <= '9' && ch >= '0' );
                     }
                                  );
                 };
         }
+    else if (answer=="AE")
+        {
+            return true;
+        }
+
     return false;
 }
 //  it restrict quantity of commands in model
 //  maybe not good idea
 bool m_view::is_regex_compatible_answer(const std::string& answer)
 {
-  auto command = _model->get_current_command().substr(0,2);
-  auto command_key = std::move(command.substr(0,2));
+    auto command = _model->get_current_command().substr(0,2);
+    auto command_key = std::move(command.substr(0,2));
     if(     command_key == "S0" )
         {
             return regex_match(answer, this->S0);
@@ -101,4 +108,11 @@ bool m_view::is_regex_compatible_answer(const std::string& answer)
         {
             return false;
         }
+}
+bool m_view::is_valid_answer(const std::string& answer)
+{
+    bool valid =
+        is_expected_answer(answer) &&
+        is_regex_compatible_answer(answer);
+    return valid;
 }

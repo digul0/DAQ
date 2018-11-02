@@ -18,7 +18,6 @@ m_open_port::m_open_port(unsigned int numPort):
     _port_init_string("\\\\.\\COM"),
     hComPort(nullptr),
     _failure(true)
-    //_m(nullptr)
 {
     if ( open() )
         init();
@@ -32,8 +31,10 @@ bool m_open_port::open()
 {
     if( hComPort ==  nullptr )
         {
-            const char *full_com_name = (_port_init_string + std::to_string(_num_of_port)).c_str();
-            hComPort = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE, 0, nullptr, OPEN_EXISTING,/*FILE_FLAG_OVERLAPPED*/0, nullptr);
+            const char *full_com_name = (_port_init_string
+                                         + std::to_string(_num_of_port)).c_str();
+            hComPort = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE,
+                                   0, nullptr, OPEN_EXISTING, 0, nullptr);
             _failure = (hComPort == INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
             if (!_failure)
@@ -41,8 +42,8 @@ bool m_open_port::open()
 #endif // OPEN_CLOSE_LOG_ON
             if (_failure)
                 {
-                    //++m_log::_failure_to_open_port_Counter;
-                    throw logic_error(string("IO error: Can't open port: COM") + std::to_string(_num_of_port)) ;
+                    throw logic_error(string("IO error: Can't open port: COM")
+                                      + std::to_string(_num_of_port)) ;
                 }
         }
     return !_failure;
@@ -61,7 +62,7 @@ void m_open_port::init()
 
     COMMTIMEOUTS timeouts = {};
     timeouts.ReadIntervalTimeout =        0xFFFFFFFF;
-    timeouts.WriteTotalTimeoutConstant =    500; //500
+    timeouts.WriteTotalTimeoutConstant =    500;
 
     DCB dcb_current = {};
     COMMTIMEOUTS timeouts_current = {};
@@ -77,7 +78,6 @@ void m_open_port::init()
 
 void m_open_port::close()
 {
-
     if (is_valid())
         {
             CloseHandle(hComPort); ///так себе вообщения
@@ -129,24 +129,17 @@ string m_open_port::read_raw()
             ReadFile (hComPort, &buf[temp_br], sz_buf, &bytes_read, nullptr); //resume reading, to &buf[bytes_read]
             temp_br+= bytes_read;
             findCRLF = find_first_of(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
-            if (try_counter > 3)
-                {
-                    return "";
-                }
+            if (try_counter > 3) return "";
         }
     string r ( cbegin(buf), findCRLF) ;
-
-//#ifdef OPEN_CLOSE_LOG_ON
-//    if (!bytes_read)
-//        ++m_log::_failure_to_read_port_Counter;
-//#endif // OPEN_CLOSE_LOG_ON
-
     return r;
 }
+
 bool m_open_port::is_valid() const
 {
     return !_failure;
 }
+
 HANDLE m_open_port::getPortHwd() const
 {
     return hComPort;
@@ -156,10 +149,12 @@ const std::string m_open_port::get_portNum() const
 {
     return string("COM") + std::to_string(_num_of_port);
 }
+
 void m_open_port::flushPort(void)
 {
     if (is_valid())
         {
-            PurgeComm(hComPort, PURGE_TXCLEAR);// | PURGE_TXABORT);
+            PurgeComm(hComPort, PURGE_RXCLEAR | PURGE_RXABORT);
+            PurgeComm(hComPort, PURGE_TXCLEAR | PURGE_TXABORT);
         }
 }

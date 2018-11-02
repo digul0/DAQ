@@ -29,10 +29,11 @@ public:
 
 public:
     /** Parse answer functions */
-    bool is_valid_answer(const std::string& answer);
-    bool is_regex_compatible_answer(const std::string& answer);
     std::vector<std::string> split_answer(const std::string& answer);
-
+    bool is_valid_answer(const std::string& answer);
+private:
+    bool is_expected_answer(const std::string& answer);
+    bool is_regex_compatible_answer(const std::string& answer);
 private:
     /** regexes */
     /*inline static*/
