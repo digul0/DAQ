@@ -21,7 +21,7 @@ m_controller::m_controller(const Settings::settings_struct& ss):
 //  Destructor provide emergency exit for any close console events.
 //  Do not add in m_controller::~m_controller() commands
 //  with total duration > delay_before_exit value
-//  in lock_ctrl_keys_exit(DWORD event_id)
+//  in lock_ctrl_keys_exit(DWORD event_id).
 m_controller::~m_controller()
 {
     std::this_thread::sleep_for(_delay);
@@ -53,11 +53,11 @@ void m_controller::do_branch_full()
 {
     while(!model->end_commands())
         {
-            //init try_counter for each command
+            // init try_counter for each command.
             size_t try_counter = 0;
             string answer ;
 
-            //Handler of invalid answer event
+            // Handler of invalid answer event.
             do
                 {
                     if (++try_counter > 3)
@@ -73,7 +73,7 @@ void m_controller::do_branch_full()
               *
               */
             if (_stop_thread_flag_pointer!=nullptr &&
-                    _stop_thread_flag_pointer->load())  //global atomic variable from main thread
+                    _stop_thread_flag_pointer->load())  // global atomic variable from main thread.
                 throw logic_error("Emergency interrupt");
 
             auto splited_answer = view->split_answer(answer);
@@ -95,7 +95,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
         ///allowed thermoresistor resistance value range in Ohm
         if ((Ohm < 600) || (Ohm > 20000))
             return -273.15;
-        return (-26.19*std::log(Ohm) + 265.7 ); //empiric formula
+        return (-26.19*std::log(Ohm) + 265.7 ); // empiric formula.
     };
 
     enum { SET = 1, REAL = 2};
@@ -149,12 +149,9 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
                         _local_results_storage[ch_number].PD_EXT_average     = measured_data / 1000.0;
                 }
         }
-    else //"A1, A2, A4, AE"
+    else // "A1, A2, A4, AE"
         {
-            //IOstate changing need
-            //go next command
-            //don't need to compute and analyze anything
-            //TODO AE handler!!!
+            // don't need to compute and analyze anything.
         };
 
     return;
@@ -162,12 +159,17 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
 
 void m_controller::acqure_temperature()
 {
-    //delay = 500ms;
     model->choose_commands_pool(m_model::CommandsPoolName::acqure_temperature);
     do_branch_full();
 }
 
-//don't run before acqure_temperature()
+
+
+// if any _local_results_storage[i].T_SET value is
+// outside spicified range or set skip the test
+// by options requirements it return false.
+
+// don't run before acqure_temperature().
 bool m_controller::test_temperature()
 {
     enum {TEMP_MODE_DEFAULT = 0, TEMP_MODE_NOSWITCH = 1 };
@@ -191,7 +193,7 @@ void m_controller::acquire_25()
     do_branch_full();
 }
 
-//for interrupted sleep
+// for interrupted sleep
 template <typename Time_duration, typename Call>
 void sleep_for_with_condition(Time_duration t, Call foo)
 {
@@ -206,8 +208,8 @@ void m_controller::acquire_55()
     model->choose_commands_pool(m_model::CommandsPoolName::switch_down);
     do_branch_full();
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
-    //Wait while temperature balanced.
-    //std::this_thread::sleep_for(60s);.
+    // Wait while temperature balanced.
+    // std::this_thread::sleep_for(60s);.
     sleep_for_with_condition(60s, [self = this]()
     {
         return self->_stop_thread_flag_pointer->load();
@@ -233,7 +235,7 @@ void m_controller::single_command_execute(const string& command)
 }
 void m_controller::_MiniIOstate::state_changer(const vector<string> splited_answer)
 {
-    //look at model regex schema
+    // look at model regex schema
     const auto& command_name = splited_answer[0];
     if (command_name == "A1")
         {

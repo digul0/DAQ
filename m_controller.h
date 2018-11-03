@@ -4,7 +4,7 @@
 #include "common_std_headers.h"
 
 
-//forward declarations
+// forward declarations
 class m_model;
 class m_view;
 namespace Settings
@@ -49,14 +49,14 @@ public:
         double PD_EXT_error   = 0;
     };
 private:
-    struct _MiniIOstate //enums mb?
+    struct _MiniIOstate
     {
         int current_channel_number;
         int current_mode;
         bool temp_was_switched;
 
         void state_changer(const std::vector<std::string> splited_answer);
-    } _miniIOstate {0,0,false};
+    };
 friend class m_controller::_MiniIOstate;
     /** interface functions*/
 public:
@@ -64,7 +64,7 @@ public:
     void acquire_25();
     void acquire_55();
     bool test_temperature();
-    ///experimental
+    //experimental
     void experimental_measurements();
     void do_branch_full();
     void single_command_execute(const std::string& command);
@@ -82,8 +82,8 @@ private:
     std::string                 _block_place;
     int                         _temperature_mode;
     int                         _receptacle;
-    _MiniIOstate                IOstate{};
-    //delay before commands
+    _MiniIOstate                _miniIOstate {0,0,false};
+    // delay before commands
     std::chrono::milliseconds   _delay;
     constexpr static size_t     _num_of_positions  {8} ; //Device channels constant
     std::vector<ResultsStorage> _local_results_storage;

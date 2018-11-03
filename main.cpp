@@ -9,40 +9,44 @@
 #include "m_log.h"
 
 #include "windows.h"
+// TODO (digul0#1#): Add project description
 
 using namespace std;
-//signal flag for exit prepare
+//signal flag threads to prepare exit
 static atomic<bool> stop_thread_flag{false};
+//callback function for emergency exit() (close console, ctrl+z, ctrl+break and etc.)
 BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id);
 
 //Uiliams page. 416
 int main()
 {
-    ///global_results_storage is common for all threads
+    // global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
+    // fixate run timepoint
     auto now_time_point = std::chrono::system_clock::now();
-
-    ///read settings
+    vector<Settings::settings_struct> settings {};
+    // try to read settings
     try
         {
-            auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
+            settings =
+            Settings::SettingsParser().get_settings_struct("Portmap.ini",
+                                                                       "Job.ini");
         }
     catch(exception& ex)
         {
             m_log()<< ex.what() <<'\n';
             return -1;
         }
-    auto settings = Settings::SettingsParser().get_settings_struct("Portmap.ini", "Job.ini");
-    //for emergency exit()
+    // set callback for emergency exit()
     SetConsoleCtrlHandler(lock_ctrl_keys_exit,true);
 
     /** Main thread process
     */
-    auto process = [&global_results_storage/*, &stop_thread_flag*/](auto ss)
+    auto process = [&global_results_storage](auto ss)
     {
         try
             {
-              //do not brake init order: model, view, controller
+              // do not brake init order: model, view, controller
                 m_model m (ss);
                 m_view v;
                 m_controller c(ss);
@@ -61,7 +65,8 @@ int main()
                     {
                         c.acquire_25();
                     }
-                //thread-safe writing from local_results_storage to global_results_storage
+                // thread-safe writing from local_results_storage
+                // to global_results_storage.
                 static mutex global_storage_mutex;
                 {
                     unique_lock<mutex> ul(global_storage_mutex);
@@ -73,7 +78,7 @@ int main()
             }
         catch (exception& ex)
             {
-                //any exception lead to exit thread
+                // any exception lead to exit thread
                 m_log()<< ex.what() << '\n';
                 return;
             }
@@ -91,20 +96,20 @@ int main()
         {
             tr.join();
         }
-    //Wait untile threads finished
-    //sort by position
+    // Wait untile threads finished
+    // and when sorting by position order.
     sort(global_results_storage.begin(), global_results_storage.end(),
          [](m_controller::ResultsStorage& value1, m_controller::ResultsStorage& value2)
     {
         return value1.Position < value2.Position;
     }
         );
-    //
+    // return log filename as "Results%Y_%m_%d-%H%M%S.txt".
     auto log_name = m_log::make_name_from_time(now_time_point);
     ofstream out (log_name);
     /** Printing to log
     */
-    ///log table header
+    // log table header.
     out << "Position" << " "
         "Serial" << " "
         "I_SLD_SET" << " "
@@ -119,7 +124,7 @@ int main()
         "PD_EXT_average" << " "
         "PD_EXT_error" << '\n';
 
-    ///log of measurments
+    // log of measurments.
     for (size_t i = 0; i < global_results_storage.size(); i++)
         {
             out << setprecision(3) << fixed << showpoint
@@ -149,7 +154,8 @@ BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
         case CTRL_C_EVENT: case CTRL_BREAK_EVENT: case CTRL_CLOSE_EVENT:
           case CTRL_LOGOFF_EVENT: case CTRL_SHUTDOWN_EVENT:
         {
-            stop_thread_flag.store(true); //tell all threads about exit
+            // tell all threads about exit
+            stop_thread_flag.store(true);
             std::this_thread::sleep_for(delay_before_exit);
             break;
         }

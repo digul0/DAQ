@@ -17,7 +17,7 @@
 #ifdef _MSC_VER
 	#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #endif
-//define from Cmake if boost is find
+// define from Cmake if boost is find.
 #ifdef HAS_BOOST
   #include <boost/regex.hpp>
 #else
