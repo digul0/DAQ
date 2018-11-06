@@ -11,17 +11,6 @@ class m_log
     * Provides multi-threaded console output
     */
 public:
-<<<<<<< HEAD
-    explicit m_log(std::ostream& out_dest = std::cout ): _ul(_mut, std::defer_lock), _out(out_dest)
-    {
-        while(!_ul.try_lock())
-            std::this_thread::yield();
-    }
-    m_log(m_log&& rlog) noexcept:
-        _ul ( std::move(rlog._ul) ),
-        _out ( rlog._out)
-=======
-    // for console
     explicit m_log(std::ostream& out_dest = std::cout ): _out(out_dest)
     {
 
@@ -33,19 +22,11 @@ public:
     }
     m_log(m_log&& rlog) noexcept:
         _out ( rlog._out), _ss(std::move(rlog._ss))
->>>>>>> 92b807c... add file output
     {
 
     }
     m_log(const m_log&)            = delete;
     m_log& operator=(const m_log&) = delete;
-<<<<<<< HEAD
-    template< typename T>
-    friend m_log&&  operator<<(m_log&&  _m_log, const T& t) noexcept;
-private:
-    inline static std::mutex _mut; //common mutex
-    std::unique_lock<std::mutex> _ul;
-=======
     ~m_log()
     {
       write_to(_out);
@@ -69,7 +50,6 @@ private:
     //inline static std::atomic<bool> flag{false};
     //inline static bool flag{false};
     //std::unique_lock<std::mutex> _ul;
->>>>>>> 92b807c... add file output
     std::ostream& _out;
 public:
     static std::string make_name_from_time (std::chrono::system_clock::time_point tp);
