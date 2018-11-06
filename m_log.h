@@ -51,6 +51,7 @@ private:
     //inline static bool flag{false};
     //std::unique_lock<std::mutex> _ul;
     std::ostream& _out;
+    std::stringstream _ss;
 public:
     static std::string make_name_from_time (std::chrono::system_clock::time_point tp);
 };
