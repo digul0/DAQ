@@ -7,10 +7,11 @@ class m_log
 {
     /**
     * @brief
-    * Обеспечивает многопоточный вывод в консоль
-    * Provides multi-threaded console output
+    * Обеспечивает многопоточный вывод в консоль или файл.
+    * Provides multi-threaded console and file output.
     */
 public:
+    // for stdout
     explicit m_log(std::ostream& out_dest = std::cout ): _out(out_dest)
     {
 
@@ -29,41 +30,34 @@ public:
     m_log& operator=(const m_log&) = delete;
     ~m_log()
     {
-      write_to(_out);
+        write_to(_out);
     }
-
-    void write_to(std::ostream& out_dest)
+private:
+    void write_to(std::ostream&)
     {
-      std::lock_guard<std::mutex> ul(_mut_console);
-      _out << _ss.rdbuf();
+        std::lock_guard<std::mutex> ul(_mut_console);
+        _out << _ss.rdbuf();
     }
-    void write_to(std::ofstream& out_file)
+    void write_to(std::ofstream&)
     {
-      std::lock_guard<std::mutex> ul(_mut_file);
-      _out << _ss.rdbuf();
+        std::lock_guard<std::mutex> ul(_mut_file);
+        _out << _ss.rdbuf();
     }
     template< typename T>
     friend m_log&&  operator<<(m_log&&  _m_log, const T& t) noexcept;
-private:
-    inline static std::mutex _mut_console; //common mutex
-    inline static std::mutex _mut_file; //common mutex
-    //inline static std::atomic<bool> flag{false};
-    //inline static bool flag{false};
-    //std::unique_lock<std::mutex> _ul;
+
+    inline static std::mutex _mut_console, _mut_file;
     std::ostream& _out;
     std::stringstream _ss;
 public:
     static std::string make_name_from_time (std::chrono::system_clock::time_point tp);
 };
 
-//Definitions mutex for output and atomic variables for counters
-
-
 //Atomic output for <<  until m_log object is live
 template< typename T>
 m_log&& operator<<(m_log&& _m_log, const T& t ) noexcept
 {
-    _m_log._out << t;
+    _m_log._ss << t;
     return std::move(_m_log);
 }
 

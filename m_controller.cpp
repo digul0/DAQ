@@ -24,14 +24,16 @@ m_controller::m_controller(const Settings::settings_struct& ss):
 //  in lock_ctrl_keys_exit(DWORD event_id).
 m_controller::~m_controller()
 {
-    std::this_thread::sleep_for(_delay);
-    single_command_execute(model->commands_list.switch_55);
-    if(_miniIOstate.current_channel_number!= 1)
-    {
-        std::this_thread::sleep_for(_delay);
-        single_command_execute(model->commands_list.go_1);
-    }
-
+    if(_miniIOstate.current_channel_number!= 0)
+        {
+            std::this_thread::sleep_for(_delay);
+            single_command_execute(model->commands_list.go_1);
+        }
+    if(_miniIOstate.temp_was_switched)
+        {
+            std::this_thread::sleep_for(_delay);
+            single_command_execute(model->commands_list.switch_55);
+        }
 }
 
 void m_controller::setView(m_view* _view)
@@ -62,26 +64,26 @@ void m_controller::do_branch_full()
                 {
                     if (++try_counter > 3)
                         {
-                            throw logic_error("IO error: try counter > 3");
+// TODO (digul0#1#): Add to message what answers were invalid
+                            throw logic_error("IO error: invalid answer recieved three times!");
                         }
                     model->execute_current_command();
                     std::this_thread::sleep_for(_delay);
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
-            /** ugly sufficient hook but it for simplify the code.
-              *
+            /** thread interrupt point here
               */
             if (_stop_thread_flag_pointer!=nullptr &&
                     _stop_thread_flag_pointer->load())  // global atomic variable from main thread.
                 throw logic_error("Emergency interrupt");
 
             auto splited_answer = view->split_answer(answer);
-            _miniIOstate.state_changer(splited_answer); //debug
-            m_log() << _miniIOstate.current_channel_number
-                  << _miniIOstate.current_mode
-                  << _miniIOstate.temp_was_switched
-                  << '\n'; //debug
+            _miniIOstate.state_changer(splited_answer);
+//            m_log() << _miniIOstate.current_channel_number
+//                  << _miniIOstate.current_mode
+//                  << _miniIOstate.temp_was_switched
+//                  << '\n';
             parse_and_push_into_result(splited_answer);
             m_log() << model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
             model->go_next_command();
@@ -92,7 +94,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
 {
     auto from_Ohm_to_T = [](double Ohm)
     {
-        ///allowed thermoresistor resistance value range in Ohm
+        //possible range thermoresistor resistance values, in Ohm
         if ((Ohm < 600) || (Ohm > 20000))
             return -273.15;
         return (-26.19*std::log(Ohm) + 265.7 ); // empiric formula.
@@ -117,10 +119,12 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
             int ch_number      = std::stoi(splited_answer[2]) - 1; // 0
             int mode           = std::stoi(splited_answer[3]);
             double measured_data  = std::stod(splited_answer[4]);
-            if (_miniIOstate.current_channel_number!=ch_number ||
-                _miniIOstate.current_mode!=mode
-                ) throw logic_error(string("Don't push any buttons on the device ")
-                                    + _block_place + "\nwhile taking measurements!" );
+            //check of recieved commands for internal state ot the device
+            if (_miniIOstate.current_channel_number!= ch_number ||
+                    _miniIOstate.current_mode!= mode
+               )
+                throw logic_error(string("Don't push any buttons on the device ")
+                                  + _block_place + "\nwhile taking measurements!" );
             if (mode == SET)
                 {
                     if      (param_num == 1)
@@ -219,11 +223,7 @@ void m_controller::acquire_55()
     model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
     do_branch_full();
 }
-void m_controller::experimental_measurements()
-{
 
-
-}
 std::vector<m_controller::ResultsStorage>
 m_controller::get_local_results_storage()
 {

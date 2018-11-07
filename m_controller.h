@@ -9,7 +9,7 @@ class m_model;
 class m_view;
 namespace Settings
 {
-    struct settings_struct;
+struct settings_struct;
 }
 
 class m_controller
@@ -27,11 +27,6 @@ public:
     m_controller& operator=(const m_controller&) = delete;
     ~m_controller();
 
-    /** MVC interface functions*/
-    void setView(m_view* _view);
-    void setModel(m_model* _model);
-    void setInterruptFlag(std::atomic<bool>* interrupt_flag);
-public:
     struct ResultsStorage
     {
         std::string Position;
@@ -48,6 +43,23 @@ public:
         double PD_EXT_average = 0;
         double PD_EXT_error   = 0;
     };
+    /** MVC interface functions*/
+    void setView(m_view* _view);
+    void setModel(m_model* _model);
+    void setInterruptFlag(std::atomic<bool>* interrupt_flag);
+
+    /** interface functions*/
+    void acqure_temperature();
+    void acquire_25();
+    void acquire_55();
+    bool test_temperature();
+    void do_branch_full();
+    void single_command_execute(const std::string& command);
+
+    void parse_and_push_into_result(const std::vector<std::string> splited_answer);
+    std::vector<ResultsStorage> get_local_results_storage();
+    template <typename Time_duration, typename Call>
+    friend  void sleep_for_with_condition(Time_duration t, Call foo);
 private:
     struct _MiniIOstate
     {
@@ -57,32 +69,16 @@ private:
 
         void state_changer(const std::vector<std::string> splited_answer);
     };
-friend class m_controller::_MiniIOstate;
-    /** interface functions*/
-public:
-    void acqure_temperature();
-    void acquire_25();
-    void acquire_55();
-    bool test_temperature();
-    //experimental
-    void experimental_measurements();
-    void do_branch_full();
-    void single_command_execute(const std::string& command);
+    friend class m_controller::_MiniIOstate;
 
-    void parse_and_push_into_result(const std::vector<std::string> splited_answer);
-    std::vector<ResultsStorage> get_local_results_storage();
-    template <typename Time_duration, typename Call>
-    friend  void sleep_for_with_condition(Time_duration t, Call foo);
-private:
     /** MVC members*/
     m_view* view;
     m_model* model;
 
-private:
     std::string                 _block_place;
     int                         _temperature_mode;
     int                         _receptacle;
-    _MiniIOstate                _miniIOstate {0,0,false};
+    _MiniIOstate                _miniIOstate;// {0,0,false};
     // delay before commands
     std::chrono::milliseconds   _delay;
     constexpr static size_t     _num_of_positions  {8} ; //Device channels constant

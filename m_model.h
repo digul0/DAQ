@@ -21,7 +21,6 @@ class m_model
     * Provides an interface for selecting and executing a precompiled command flow,
     * as well as receiving a response from the com port.
     */
-private:
     using command_impl_type = std::string;
     using answer_imp_type   = command_impl_type;
     using commands_sequence = std::vector<command_impl_type>; // commands sequence
@@ -37,14 +36,12 @@ public:
         switch_to_default = 4
     };
 
-public:
     explicit m_model(const Settings::settings_struct& ss );
     m_model(const m_model&) = delete;
     m_model& operator=(const m_model&) = delete;
     ~m_model();// = default;
 
     /** Struct contained list of aviable commands for IO*/
-public:
     const struct _commands_list
     {
         const command_impl_type
@@ -72,23 +69,20 @@ public:
 
     /** state changing interface functions*/
 
-public:
     void choose_commands_pool(CommandsPoolName choose);
-    void execute_single_command (const std::string& command);
     void execute_current_command ();
-    answer_imp_type  read_answer() ;
+    void execute_single_command (const std::string& command);
     void go_next_command();
+    answer_imp_type read_answer() ;
     bool end_commands ();
     const answer_imp_type get_current_command();
     const answer_imp_type get_current_answer();
 private:
     void _commands_pool_init();
     void _check_end();
-    /** MVC interface functions*/
 
-    /** state members*/
-private:
     std::unique_ptr<m_open_port>  _port;
+    /** state members*/
     commands_pool                _commands_pool;
     commands_sequence*           _current_commands_sequence;
     command_impl_type            _current_command;

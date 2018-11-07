@@ -30,7 +30,7 @@ public:
     m_open_port(m_open_port&&) = default;
     ~m_open_port();
 
-public:
+    /** Interface functions*/
     void write_raw(const std::string& command);
     std::string read_raw ();//?
     const std::string get_portNum() const ;
@@ -43,7 +43,6 @@ private:
     void close();
     bool is_valid() const; // virtual com port checking only, not device!
 
-private:
     unsigned int _num_of_port;
     const std::string _port_init_string;
     HANDLE hComPort;
