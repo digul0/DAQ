@@ -127,21 +127,21 @@ int main()
     // log of measurments.
     for (size_t i = 0; i < global_results_storage.size(); i++)
         {
-            out << setprecision(3) << fixed << showpoint
-                << global_results_storage[i].Position << " "
-                << global_results_storage[i].Serial << " "
-                << global_results_storage[i].I_SLD_SET << " "
-                << global_results_storage[i].T_SET_Ohm << " "
-                << global_results_storage[i].T_SET << " "
-                << global_results_storage[i].LIMIT << " "
-                << global_results_storage[i].I_SLD_REAL << " "
-                << global_results_storage[i].T_REAL_Ohm << " "
-                << global_results_storage[i].T_REAL << " "
-                << global_results_storage[i].PD_INT_average << " "
-                << global_results_storage[i].PD_INT_error << " "
-                << global_results_storage[i].PD_EXT_average << " "
-                << global_results_storage[i].PD_EXT_error << " "
-                << '\n';
+     out << fixed
+         << global_results_storage[i].Position << " "
+         << global_results_storage[i].Serial << " "
+         << setprecision(1) << showpoint << global_results_storage[i].I_SLD_SET << " "
+         << setprecision(0) << noshowpoint << global_results_storage[i].T_SET_Ohm << " "
+         << setprecision(3) << showpoint << global_results_storage[i].T_SET << " "
+         << setprecision(1) << showpoint << global_results_storage[i].LIMIT << " "
+         << setprecision(1) << showpoint << global_results_storage[i].I_SLD_REAL << " "
+         << setprecision(0) << noshowpoint << global_results_storage[i].T_REAL_Ohm << " "
+         << setprecision(3) << showpoint << global_results_storage[i].T_REAL << " "
+         << setprecision(3) << showpoint << global_results_storage[i].PD_INT_average << " "
+         << setprecision(3) << showpoint << global_results_storage[i].PD_INT_error << " "
+         << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_average << " "
+         << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_error << " "
+         << '\n';
         }
     return 0;
 }
