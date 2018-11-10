@@ -50,7 +50,10 @@ private:
     std::ostream& _out;
     std::stringstream _ss;
 public:
-    static std::string make_name_from_time (std::chrono::system_clock::time_point tp);
+    static const std::string make_name_from_time (const std::string name_prefix,
+                                            std::chrono::system_clock::time_point tp,
+                                            const std::string name_postfix
+                                            );
 };
 
 //Atomic output for <<  until m_log object is live
