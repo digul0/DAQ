@@ -25,6 +25,14 @@ using namespace std;
 
 struct settings_struct
 {
+  /**
+   * @brief
+   * port             - com port number
+   * position         - device name according to enternal naming
+   * receptacle       - not used
+   * temperature_mode - describe nessesary to switch device to ambient
+   *                    temperature before start measurements.
+   */
     int port;
     string position;
     int receptacle;
