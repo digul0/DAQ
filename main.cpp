@@ -37,19 +37,24 @@ int main()
             m_log()<< ex.what() <<'\n';
             return -1;
         }
+    // maybe should use signal.h ?
     // set callback for emergency exit()
     SetConsoleCtrlHandler(lock_ctrl_keys_exit,true);
 
-    /** Main thread process
+    auto log_answers_name = m_log::make_name_from_time("Answers", now_time_point, ".txt");
+    ofstream log_answers (log_answers_name);
+// TODO (digul0#1#): answers log
+
+    /* Main thread process
     */
-    auto process = [&global_results_storage](auto ss)
+    auto process = [&global_results_storage](auto settings_struct)
     {
         try
             {
               // do not brake init order: model, view, controller
-                m_model m (ss);
+                m_model m (settings_struct);
                 m_view v;
-                m_controller c(ss);
+                m_controller c(settings_struct);
 
                 v.setModel(&m);
                 c.setInterruptFlag(&stop_thread_flag);
@@ -67,8 +72,8 @@ int main()
                     }
                 // thread-safe writing from local_results_storage
                 // to global_results_storage.
-                static mutex global_storage_mutex;
                 {
+                    static mutex global_storage_mutex;
                     unique_lock<mutex> ul(global_storage_mutex);
                     auto local_results_storage = c.get_local_results_storage();
                     std::move(local_results_storage.begin(),
@@ -105,8 +110,8 @@ int main()
     }
         );
     // return log filename as "Results%Y_%m_%d-%H%M%S.txt".
-    auto log_name = m_log::make_name_from_time(now_time_point);
-    ofstream out (log_name);
+    auto log_results_name = m_log::make_name_from_time("Results", now_time_point, ".txt");
+    ofstream out (log_results_name);
     /** Printing to log
     */
     // log table header.
@@ -154,7 +159,7 @@ BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
         case CTRL_C_EVENT: case CTRL_BREAK_EVENT: case CTRL_CLOSE_EVENT:
           case CTRL_LOGOFF_EVENT: case CTRL_SHUTDOWN_EVENT:
         {
-            // tell all threads about exit
+            // send exit signal to all threads.
             stop_thread_flag.store(true);
             std::this_thread::sleep_for(delay_before_exit);
             break;

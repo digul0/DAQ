@@ -42,7 +42,7 @@ public:
     ~m_model();// = default;
 
     /** Struct contained list of aviable commands for IO*/
-    const struct _commands_list
+    const struct Commands_list
     {
         const command_impl_type
         ask_name    = "S0",
