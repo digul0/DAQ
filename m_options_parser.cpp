@@ -8,7 +8,7 @@ using boost::regex, boost::sregex_iterator, boost::regex;
 using std::regex, std::sregex_iterator, std::regex;
 #endif // HAS_BOOST
 
-using std::string, std::vector, std::map;
+using std::string, std::vector, std::map, std::stringstream, std::numeric_limits, std::logic_error;
 namespace Settings
 {
 vector<settings_struct>
@@ -69,7 +69,7 @@ string SettingsReader::read_settings_to_whole_string(have_header h) const
     stringstream s;
     //skip settings header
     if ( h == have_header::have )
-        _f.ignore(numeric_limits<streamsize>::max(),'\n');
+        _f.ignore(numeric_limits<std::streamsize>::max(),'\n');
     s << _f.rdbuf();
     return s.str();
 }

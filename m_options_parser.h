@@ -21,7 +21,7 @@ namespace Settings
 *                              WHERE [Portmap.ini] .Position = [Job.ini].Position;")
 * and transfering the result to the user.
 */
-using namespace std;
+
 
 struct settings_struct
 {
@@ -34,7 +34,7 @@ struct settings_struct
    *                    temperature before start measurements.
    */
     int port;
-    string position;
+    std::string position;
     int receptacle;
     int temperature_mode;
 };
@@ -42,22 +42,22 @@ struct settings_struct
 class SettingsReader
 {
 public:
-    explicit SettingsReader( const string& ini_name ) : _filename(ini_name), _f(ini_name) {}
+    explicit SettingsReader( const std::string& ini_name ) : _filename(ini_name), _f(ini_name) {}
     SettingsReader( const SettingsReader& )  =  delete;
     enum class have_header
     {    have,    no_have  };
-    string read_settings_to_whole_string(have_header h = have_header::no_have) const;
+    std::string read_settings_to_whole_string(have_header h = have_header::no_have) const;
 private:
-    const string _filename;
-    mutable ifstream _f;
+    const std::string _filename;
+    mutable std::ifstream _f;
 };
 
 
 class SettingsParser
 {
 public:
-    vector<settings_struct>
-    get_settings_struct (const string& _portmap_ini_name, const string& _job_ini_name );
+    std::vector<settings_struct>
+    get_settings_struct (const std::string& _portmap_ini_name, const std::string& _job_ini_name );
 
 };
 } //end Settings namespace
