@@ -13,9 +13,12 @@ using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 using std::logic_error;
 
 m_controller::m_controller(const Settings::settings_struct& ss):
-    _block_place(ss.position), _temperature_mode(ss.temperature_mode), _receptacle(ss.receptacle),
+    _block_place(ss.position),
+    _temperature_mode(ss.temperature_mode),
+    _receptacle(ss.receptacle),
+    _miniIOstate({0,0,false}),
     _delay(500ms),
-    _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions) ))
+    _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions)))
 {
 }
 //  Destructor provide emergency exit for any close console events.
@@ -67,7 +70,7 @@ void m_controller::do_branch_full()
 // TODO (digul0#1#): Add to message what answers were invalid
                             throw logic_error("IO error: invalid answer recieved three times!");
                         }
-                    model->execute_current_command();
+                    model->execute_current_command(); //try ex
                     std::this_thread::sleep_for(_delay);
                     answer = model->read_answer();
                 }
@@ -85,7 +88,8 @@ void m_controller::do_branch_full()
 //                  << _miniIOstate.temp_was_switched
 //                  << '\n';
             parse_and_push_into_result(splited_answer);
-            m_log() << model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
+            m_log() << _block_place <<" : "<< model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
+            m_log(m_log::other::to_setted_log_file) << _block_place <<" : "<< model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
             model->go_next_command();
             std::this_thread::sleep_for(_delay);
         }
@@ -197,7 +201,7 @@ void m_controller::acquire_25()
     do_branch_full();
 }
 
-// for interrupted sleep
+
 template <typename Time_duration, typename Call>
 void sleep_for_with_condition(Time_duration t, Call foo)
 {
