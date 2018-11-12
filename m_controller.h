@@ -16,8 +16,6 @@ class m_controller
 {
     /**
     * @brief
-    * Обеспечивает основную логику приложения: управление алгоритмом опроса com-порта с помощью интерфейса
-    * модели, анализ поступивших ответов, обработка ошибок и формирование массива выходных данных.
     * Provides the main application logic: control of the com-port polling algorithm using the model interface,
     * analysis of incoming responses, error handling and generation of an output data.
     */

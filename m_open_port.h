@@ -17,8 +17,6 @@ class m_open_port
 {
     /**
     *@brief
-    * Обеспечивает настройку, подключение и интерфейс
-    * синхронного чтения/записи в Com-порт.
     * Provides configuration, connection and synchronous
     * read/write interface to the Com port.
     */
@@ -30,11 +28,11 @@ public:
     m_open_port(m_open_port&&) = default;
     ~m_open_port();
 
-    /** Interface functions*/
+    // Interface functions
     void write_raw(const std::string& command);
-    std::string read_raw ();//?
+    std::string read_raw ();
     const std::string get_portNum() const ;
-    HANDLE getPortHwd() const; //typedef void HANDLE; (???!!)
+    HANDLE getPortHwd() const;
     void flushPort();
 
 private:

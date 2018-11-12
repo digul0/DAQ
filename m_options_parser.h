@@ -12,10 +12,6 @@ namespace Settings
 {
 /**
 * @brief
-* Обеспечивает парсинг файлов текстовых настроек (вшитые Portmap.ini, Job.ini),
-* выборку (aka SQL "SELECT [Portmap.ini].* FROM [Job.ini], [Portmap.ini]
-*                              WHERE [Portmap.ini].Position = [Job.ini].Position;")
-* и передачу результата пользователю.
 * Provides parsing of text settings files (Portmap.ini, Job.ini),
 * sampling (aka SQL "SELECT [Portmap.ini].* FROM [Job.ini], [Portmap.ini]
 *                              WHERE [Portmap.ini] .Position = [Job.ini].Position;")

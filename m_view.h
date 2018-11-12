@@ -14,8 +14,6 @@ class m_view
 {
   /**
   * @brief
-  *  Обеспечивает валидацию ответа и разбиению цельного ответа на составляющие
-  * согласно заданному регулярному шаблону
   * Provides validation of the response and splitting a complete response
   * to the components according to a specified regular expressions.
   */

@@ -7,7 +7,6 @@ class m_log
 {
     /**
     * @brief
-    * Обеспечивает многопоточный вывод в консоль или файл.
     * Provides multi-threaded console and file output.
     */
 public:

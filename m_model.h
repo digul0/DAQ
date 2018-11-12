@@ -16,8 +16,6 @@ class m_model
 {
     /**
     * @brief
-    * Обеспечивает интерфейс для выбора и исполнения предварительно скомпилированного
-    * потока команд, а так же получения ответа от com-порта.
     * Provides an interface for selecting and executing a precompiled command flow,
     * as well as receiving a response from the com port.
     */
