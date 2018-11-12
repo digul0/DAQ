@@ -43,6 +43,7 @@ int main()
 
     auto log_answers_name = m_log::make_name_from_time("Answers", now_time_point, ".txt");
     ofstream log_answers (log_answers_name);
+    m_log::setLogfile(&log_answers);
 // TODO (digul0#1#): answers log
 
     /* Main thread process
