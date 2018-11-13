@@ -1,6 +1,7 @@
 
 #include "common_std_headers.h"
 #include <iomanip>
+#include <signal.h>
 
 #include "m_model.h"
 #include "m_view.h"
@@ -15,7 +16,7 @@ using namespace std;
 //signal flag threads to prepare exit
 static atomic<bool> stop_thread_flag{false};
 //callback function for emergency exit() (close console, ctrl+z, ctrl+break and etc.)
-BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id);
+void exit_handler(int event_id);
 
 //Uiliams page. 416
 int main()
@@ -37,14 +38,12 @@ int main()
             m_log()<< ex.what() <<'\n';
             return -1;
         }
-    // maybe should use signal.h ?
     // set callback for emergency exit()
-    SetConsoleCtrlHandler(lock_ctrl_keys_exit,true);
-
+    signal(SIGINT, exit_handler);
+    signal(SIGBREAK, exit_handler);
     auto log_answers_name = m_log::make_name_from_time("Answers", now_time_point, ".txt");
     ofstream log_answers (log_answers_name);
     m_log::setLogfile(&log_answers);
-// TODO (digul0#1#): answers log
 
     /* Main thread process
     */
@@ -86,6 +85,7 @@ int main()
             {
                 // any exception lead to exit thread
                 m_log()<< ex.what() << '\n';
+                m_log(m_log::other::to_setted_log_file)<< ex.what() <<'\n';
                 return;
             }
     };
@@ -151,24 +151,12 @@ int main()
         }
     return 0;
 }
-BOOL WINAPI lock_ctrl_keys_exit(DWORD event_id)
+void exit_handler(int event_id)
 {
   using namespace std::chrono_literals;
-  auto delay_before_exit = 5s;
-    switch (event_id)
-        {
-        case CTRL_C_EVENT: case CTRL_BREAK_EVENT: case CTRL_CLOSE_EVENT:
-          case CTRL_LOGOFF_EVENT: case CTRL_SHUTDOWN_EVENT:
-        {
-            // send exit signal to all threads.
-            stop_thread_flag.store(true);
-            std::this_thread::sleep_for(delay_before_exit);
-            break;
-        }
-        default:
-            {
-              return false;
-            }
-        }
-  return false;
+  auto delay_before_exit = 10s;
+  stop_thread_flag.store(true);
+  //compiler cut this wait foo
+  std::this_thread::sleep_for(delay_before_exit);
+  return ;
 }
