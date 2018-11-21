@@ -2,6 +2,7 @@
 #include "common_std_headers.h"
 #include <iomanip>
 #include <signal.h>
+#include <iostream>
 
 #include "m_model.h"
 #include "m_view.h"
@@ -11,15 +12,27 @@
 
 #include "windows.h"
 // TODO (digul0#1#): Add project description
-
+#ifdef BUILD_DLL
+    #define DLL_EXPORT __declspec(dllexport)
+#else
+    #define DLL_EXPORT
+#endif
 using namespace std;
+
+extern "C"
+int DLL_EXPORT main_process();
+int main()
+{
+  main_process();
+  return 0;
+}
+
 //signal flag threads to prepare exit
 static atomic<bool> stop_thread_flag{false};
 //callback function for emergency exit() (close console, ctrl+z, ctrl+break and etc.)
 void exit_handler(int event_id);
 
-//Uiliams page. 416
-int main()
+int DLL_EXPORT main_process()
 {
     // global_results_storage is common for all threads
     vector<m_controller::ResultsStorage> global_results_storage;
@@ -154,9 +167,34 @@ int main()
 void exit_handler(int event_id)
 {
   using namespace std::chrono_literals;
-  auto delay_before_exit = 10s;
+  auto delay_before_exit = 5s;
   stop_thread_flag.store(true);
   //compiler cut this wait foo
   std::this_thread::sleep_for(delay_before_exit);
   return ;
 }
+#ifdef BUILD_DLL
+extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+    switch (fdwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+            // attach to process
+            // return FALSE to fail DLL load
+            break;
+
+        case DLL_PROCESS_DETACH:
+            // detach from process
+            break;
+
+        case DLL_THREAD_ATTACH:
+            // attach to thread
+            break;
+
+        case DLL_THREAD_DETACH:
+            // detach from thread
+            break;
+    }
+    return TRUE; // succesful
+}
+#endif
