@@ -51,12 +51,12 @@ private:
     void write_to(std::ostream&)
     {
         std::lock_guard<std::mutex> ul(_mut_console);
-        *_out << _ss.rdbuf();
+        *_out << _ss.rdbuf() << std::flush;
     }
     void write_to(std::ofstream&)
     {
         std::lock_guard<std::mutex> ul(_mut_file);
-        *_out << _ss.rdbuf();
+        *_out << _ss.rdbuf() << std::flush;
     }
     template< typename T>
     friend m_log&&  operator<<(m_log&&  _m_log, const T& t) noexcept;
