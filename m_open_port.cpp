@@ -38,7 +38,12 @@ bool m_open_port::open()
             _failure = (hComPort == INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
             if (!_failure)
-                m_log()<<"Port "<<_num_of_port<<" is opened!"<<'\n';
+            {
+              m_log(m_log::other::to_setted_log_file)
+                     <<"Port "<<_num_of_port<<" is opened!"<<'\n';
+              m_log()<<"Port "<<_num_of_port<<" is opened!"<<'\n';
+            }
+
 #endif // OPEN_CLOSE_LOG_ON
             if (_failure)
                 {
@@ -84,6 +89,8 @@ void m_open_port::close()
             _failure = true;
             hComPort = nullptr;
 #ifdef OPEN_CLOSE_LOG_ON
+            m_log(m_log::other::to_setted_log_file)
+                    << "Port COM" << _num_of_port << " closed!" << '\n';
             m_log() << "Port COM" << _num_of_port << " closed!" << '\n';
 #endif // OPEN_CLOSE_LOG_ON
         }

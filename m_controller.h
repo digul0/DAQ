@@ -29,17 +29,17 @@ public:
     {
         std::string Position;
         std::string Serial;
-        double I_SLD_SET      = 0;
-        double T_SET_Ohm      = 0;
-        double T_SET          = 0;
-        double LIMIT          = 0;
-        double I_SLD_REAL     = 0;
-        double T_REAL_Ohm     = 0;
-        double T_REAL         = 0;
-        double PD_INT_average = 0;
-        double PD_INT_error   = 0;
-        double PD_EXT_average = 0;
-        double PD_EXT_error   = 0;
+        double I_SLD_SET;
+        double T_SET_Ohm;
+        double T_SET;
+        double LIMIT;
+        double I_SLD_REAL;
+        double T_REAL_Ohm;
+        double T_REAL;
+        double PD_INT_average;
+        double PD_INT_error;
+        double PD_EXT_average;
+        double PD_EXT_error;
     };
     /* MVC interface functions*/
     void setView(m_view* _view);
