@@ -55,7 +55,8 @@ int DLL_EXPORT main_process()
     signal(SIGINT, exit_handler);
     signal(SIGBREAK, exit_handler);
     auto log_answers_name = m_log::make_name_from_time("Answers", now_time_point, ".txt");
-    ofstream log_answers (log_answers_name);
+    auto full_log_answers_name = string(".\\Answers\\") + log_answers_name;
+    ofstream log_answers (full_log_answers_name);
     m_log::setLogfile(&log_answers);
 
     /* Main thread process
@@ -125,7 +126,8 @@ int DLL_EXPORT main_process()
         );
     // return log filename as "Results%Y_%m_%d-%H%M%S.txt".
     auto log_results_name = m_log::make_name_from_time("Results", now_time_point, ".txt");
-    ofstream out (log_results_name);
+    auto full_log_results_name = string(".\\Results\\") + log_results_name;
+    ofstream out (full_log_results_name);
     /** Printing to log
     */
     // log table header.
