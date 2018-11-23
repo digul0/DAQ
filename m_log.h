@@ -2,6 +2,8 @@
 #define M_LOG_H
 
 #include "common_std_headers.h"
+template<typename T>
+class Mutex_selector;
 
 class m_log
 {
@@ -29,7 +31,8 @@ public:
             {
                 _out = _p_setted_file;
             }
-       else throw std::logic_error("out log file not set!");
+        else
+            throw std::logic_error("out log file not set!");
     }
     m_log(m_log&& rlog) noexcept:
         _out ( rlog._out), _ss(std::move(rlog._ss))
@@ -48,27 +51,24 @@ public:
         _p_setted_file = out_file;
     }
 private:
-    void write_to(std::ostream&)
+    template<typename T>
+    void write_to(T&)
     {
-        std::lock_guard<std::mutex> ul(_mut_console);
-        *_out << _ss.rdbuf() << std::flush;
-    }
-    void write_to(std::ofstream&)
-    {
-        std::lock_guard<std::mutex> ul(_mut_file);
+        auto& relevant_mutex = Mutex_selector<T>::get();
+        std::lock_guard<std::mutex> ul(relevant_mutex);
         *_out << _ss.rdbuf() << std::flush;
     }
     template< typename T>
     friend m_log&&  operator<<(m_log&&  _m_log, const T& t) noexcept;
 
-    inline static std::mutex _mut_console, _mut_file;
+    //inline static std::mutex _mut_console, _mut_file;
     std::ostream* _out {nullptr};
     std::stringstream _ss;
     inline static std::ofstream* _p_setted_file {nullptr};
 public:
     static const std::string make_name_from_time (const std::string name_prefix,
-                                                  std::chrono::system_clock::time_point tp,
-                                                  const std::string name_postfix
+            std::chrono::system_clock::time_point tp,
+            const std::string name_postfix
                                                  );
 };
 
@@ -80,5 +80,30 @@ m_log&& operator<<(m_log&& _m_log, const T& t ) noexcept
     return std::move(_m_log);
 }
 
+//choose relevant static mutex
+template<typename T>
+class Mutex_selector
+{
+public:
+    static std::mutex& get()
+    {
+        if (std::is_same_v<std::ofstream,T> )
+            {
+                return _mut_file;
+            }
+        else if (std::is_same_v<std::ostream,T>)
+            {
+                return _mut_console;
+            }
+        else
+            {
+                return _any_common_mut;
+            }
+    };
+private:
+    inline static std::mutex _mut_console,
+                             _mut_file,
+                             _any_common_mut;
+};
 #endif // M_LOG_H
 
