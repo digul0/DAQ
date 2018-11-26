@@ -2,6 +2,8 @@
 #define M_LOG_H
 
 #include "common_std_headers.h"
+#include <iomanip>
+#include <sstream>
 template<typename T>
 class Mutex_selector;
 

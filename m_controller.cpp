@@ -1,5 +1,4 @@
 #include <iomanip>
-#include <fstream>
 #include <cmath>
 
 #include "m_controller.h"
@@ -18,7 +17,7 @@ m_controller::m_controller(const Settings::settings_struct& ss):
     _receptacle(ss.receptacle),
     _miniIOstate({0,0,false}),
     _delay(500ms),
-    _local_results_storage(std::move(vector<ResultsStorage>(_num_of_positions)))
+    _local_results_storage(vector<ResultsStorage>(_num_of_positions))
 {
 }
 //  Destructor provide emergency exit for any close console events.
@@ -75,6 +74,7 @@ void m_controller::do_branch_full()
                     answer = model->read_answer();
                 }
             while (!view->is_valid_answer(answer));
+
             /** thread interrupt point here
               */
             if (_stop_thread_flag_pointer!=nullptr &&
@@ -88,8 +88,15 @@ void m_controller::do_branch_full()
 //                  << _miniIOstate.temp_was_switched
 //                  << '\n';
             parse_and_push_into_result(splited_answer);
-            m_log() << _block_place <<" : "<< model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
-            m_log(m_log::other::to_setted_log_file) << _block_place <<" : "<< model->get_current_command()<< " << " << model->get_current_answer()<<'\n';
+            m_log() << _block_place
+                    << " : "  << model->get_current_command()
+                    << " << " << model->get_current_answer()
+                    << '\n';
+            m_log(m_log::other::to_setted_log_file)
+                    << _block_place
+                    << " : "  << model->get_current_command()
+                    << " << " << model->get_current_answer()
+                    << '\n';
             model->go_next_command();
             std::this_thread::sleep_for(_delay);
         }
@@ -109,7 +116,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
     if (command_name == "A0")
         {
             auto serial = splited_answer[4];
-            for (size_t i = 0; i < 8 ; ++i )
+            for (size_t i = 0; i < _num_of_positions ; ++i )
                 {
                     _local_results_storage[i].Serial = serial;
                     _local_results_storage[i].Position = _block_place + "-" + to_string(i + 1);

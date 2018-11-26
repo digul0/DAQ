@@ -10,8 +10,6 @@
 #include <thread>
 #include <mutex>
 #include <fstream>
-#include <sstream>
-#include <map>
 
 
 // define from Cmake if boost is find.

@@ -1,8 +1,6 @@
 
 #include "common_std_headers.h"
-#include <iomanip>
 #include <signal.h>
-#include <iostream>
 
 #include "m_model.h"
 #include "m_view.h"

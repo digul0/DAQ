@@ -1,6 +1,5 @@
-#ifndef PARSER_H
+#include <map>
 #include "m_options_parser.h"
-#endif // PARSER_H
 
 #ifdef HAS_BOOST
 using boost::regex, boost::sregex_iterator, boost::regex;
