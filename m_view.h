@@ -22,18 +22,19 @@ public:
     ~m_view();
     m_view(const m_view&) = delete;
     m_view& operator=(const m_view&) = delete;
-public:
-  /** MVC interface functions*/
+
+    /** MVC interface functions*/
     void setModel(m_model* model);
 
-public:
     /** Parse answer functions */
     std::vector<std::string> split_answer(const std::string& answer);
     bool is_valid_answer(const std::string& answer);
 private:
-    bool is_expected_answer(const std::string& answer);
-    bool is_regex_compatible_answer(const std::string& answer);
-private:
+    bool _is_expected_answer(const std::string& answer);
+    bool _is_regex_compatible_answer(const std::string& answer);
+    /** MVC members*/
+    m_model* _model;
+
     /** regexes */
     inline const static
     regex S0{"A0"  "(\\d{1})"   "(\\d{1})"  "(\\d{1})"   "(\\d{5})"};
@@ -55,8 +56,6 @@ private:
     regex S4{"A4"                           "(\\d{1})"};
                   // ^^                               ^^
                   // A4                               temperature_mode
-    /** MVC members*/
-    m_model* _model;
 
 };
 #endif // M_VIEW_H

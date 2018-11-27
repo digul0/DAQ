@@ -164,7 +164,7 @@ int DLL_EXPORT main_process()
         }
     return 0;
 }
-void exit_handler(int event_id)
+void exit_handler(int)
 {
   using namespace std::chrono_literals;
   auto delay_before_exit = 5s;
