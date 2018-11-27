@@ -43,7 +43,7 @@ private:
 
     unsigned int _num_of_port;
     const std::string _port_init_string;
-    HANDLE hComPort;
+    HANDLE _com_port_handle;
     bool _failure; //rename to port_is_open
 };
 #endif // M_OPEN_PORT_H

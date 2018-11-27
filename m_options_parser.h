@@ -1,7 +1,5 @@
-/**@file Хедеры для набора классов для парсинга опций из обычных текстовых файлов.
- *@brief Файл с опциями из-за требований обратной совместимости
- * представляет собой список строк с '\n' на конце.
- * Два файла
+/**
+ * @brief Options files is a list of text-strings due to backward compatibility requrements.
  */
 #ifndef M_OPTIONS_PARSER_H
 #define M_OPTIONS_PARSER_H

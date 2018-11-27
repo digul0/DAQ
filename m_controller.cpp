@@ -82,6 +82,7 @@ void m_controller::do_branch_full()
                 throw logic_error("Emergency interrupt");
 
             auto splited_answer = view->split_answer(answer);
+            //
             _miniIOstate.state_changer(splited_answer);
 //            m_log() << _miniIOstate.current_channel_number
 //                  << _miniIOstate.current_mode
@@ -130,7 +131,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
             int ch_number      = std::stoi(splited_answer[2]) - 1; // 0
             int mode           = std::stoi(splited_answer[3]);
             double measured_data  = std::stod(splited_answer[4]);
-            //check of recieved commands for internal state ot the device
+            //check consistency between recieved commands and internal state of the device
             if (_miniIOstate.current_channel_number!= ch_number ||
                     _miniIOstate.current_mode!= mode
                )
