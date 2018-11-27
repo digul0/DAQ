@@ -97,58 +97,54 @@ void m_open_port::close()
 void m_open_port::write_raw(const std::string& command)
 {
     /**
-      Data exchange by protocol structure: [ASCII command][null-terminator][CL+LF].
+      Data transmit by protocol structure is: [ASCII command][CL+LF].
     */
     //static const char eol[] = "\n";
     if (!this->is_valid() || command.empty())
         return;
-    constexpr char CRLF[] = "\r\n";
+    constexpr char CRLF[2] = {'\r','\n'};
     DWORD bytes_written = 0;
-
     flushPort();
-    // split into 2 write operations
-    //Send command string with null-terminator
-    WriteFile(_com_port_handle, command.data(), command.size() + 1, &bytes_written, nullptr);
-    //                                                    ^^ + null-terminator
-    //Send CRLF string without null-terminator
-    WriteFile(_com_port_handle, CRLF, sizeof(CRLF) - 1, &bytes_written, nullptr);
-    //                                      ^^ - null-terminator
+    //Send command string without null-terminator
+    const std::string full_command = command + std::string(CRLF);
+    size_t full_command_size = command.size() + sizeof(CRLF);
+    WriteFile(_com_port_handle, full_command.data(), full_command_size , &bytes_written, nullptr);
     return ;
 }
-string m_open_port::read_raw()
+const string m_open_port::read_raw()
 {
+    /**
+      Data receive by protocol structure is: [ASCII answer][CL+LF].
+    */
     using std::cbegin, std::cend, std::search;
     if (!is_valid())
         return {};
-    DWORD bytes_read  =  0;
+
     char buf[30]      = {};
     DWORD sz_buf = sizeof(buf)/sizeof(*buf);
     constexpr char CRLF[2] = {'\r','\n'};
-    ReadFile (_com_port_handle, buf, sz_buf, &bytes_read, nullptr);
-    auto findCRLF = search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
+    // Handler of invalid answer event.
+    size_t try_counter = 0;
+    DWORD bytes_read  =  0;
     size_t temp_br = bytes_read;
-
-    for(size_t try_counter = 0; findCRLF == cend(buf); ++try_counter)
-        {
-            std::this_thread::sleep_for(100ms);
-            //resume reading, to &buf[bytes_read]
-            ReadFile (_com_port_handle, &buf[temp_br], sz_buf, &bytes_read, nullptr);
-            temp_br+= bytes_read;
-            findCRLF = std::search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
-            if (try_counter > 3) return "";
-        }
-    string r ( cbegin(buf), findCRLF) ;
+    auto findCRLF = cend(buf);
+        do
+            {
+                if (++try_counter > 3) return "";//handle this obviously invalid answer later
+                //add delay before new try
+                if ( try_counter > 1 ) std::this_thread::sleep_for(100ms);
+                ReadFile (_com_port_handle, &buf[temp_br], sz_buf, &bytes_read, nullptr);
+                temp_br+= bytes_read;
+                findCRLF = std::search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
+            }
+        while ( findCRLF==cend(buf) );
+    const string r (cbegin(buf), findCRLF);
     return r;
 }
 
 bool m_open_port::is_valid() const
 {
     return !_failure;
-}
-
-HANDLE m_open_port::getPortHwd() const
-{
-    return _com_port_handle;
 }
 
 const std::string m_open_port::get_portNum() const

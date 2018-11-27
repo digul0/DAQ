@@ -30,15 +30,14 @@ public:
 
     // Interface functions
     void write_raw(const std::string& command);
-    std::string read_raw ();
+    const std::string read_raw ();
     const std::string get_portNum() const ;
-    HANDLE getPortHwd() const;
-    void flushPort();
 
 private:
     bool open ();
     void init();
     void close();
+    void flushPort();
     bool is_valid() const; // virtual com port checking only, not device!
 
     unsigned int _num_of_port;
