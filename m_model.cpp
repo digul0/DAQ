@@ -163,7 +163,7 @@ void m_model::_check_end()
     _end_of_branch = (_current_command_seq_it == _current_commands_sequence->end());
 }
 
-m_model::answer_imp_type
+std::string
 m_model::read_answer()
 {
     return _answer = _port->read_raw();
@@ -179,12 +179,12 @@ bool  m_model::end_commands ()
 {
     return _end_of_branch;
 }
-const m_model::answer_imp_type
+const std::string
 m_model::get_current_command()
 {
     return _current_command;
 }
-const m_model::answer_imp_type
+const std::string
 m_model::get_current_answer()
 {
     return _answer;

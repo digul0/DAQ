@@ -11,6 +11,30 @@ namespace Settings
 }
 class m_open_port;
 
+/** Struct contained list of aviable commands for IO*/
+struct Commands_list
+{
+    const std::string
+    ask_name    = "S0",
+    ask_posit   = "S10",
+    go_1        = "S11",
+    go_2        = "S12",
+    go_3        = "S13",
+    go_4        = "S14",
+    go_5        = "S15",
+    go_6        = "S16",
+    go_7        = "S17",
+    go_8        = "S18",
+    ask_mode    = "S20",
+    switch_set  = "S21",
+    switch_real = "S22",
+    get_Isld    = "S31",
+    get_T       = "S32",
+    get_pdi     = "S33",
+    switch_25   = "S41",
+    switch_55   = "S40";
+    /** */
+};
 
 class m_model
 {
@@ -19,9 +43,7 @@ class m_model
     * Provides an interface for selecting and executing a precompiled command flow,
     * as well as receiving a response from the com port.
     */
-    using command_impl_type = std::string;
-    using answer_imp_type   = command_impl_type;
-    using commands_sequence = std::vector<command_impl_type>; // commands sequence
+    using commands_sequence = std::vector<std::string>; // commands sequence
     using commands_pool = std::vector<commands_sequence>; // all commands sequence pool
 
 public:
@@ -40,30 +62,7 @@ public:
     ~m_model();// = default;
 
     /** Struct contained list of aviable commands for IO*/
-    const struct Commands_list
-    {
-        const command_impl_type
-        ask_name    = "S0",
-        ask_posit   = "S10",
-        go_1        = "S11",
-        go_2        = "S12",
-        go_3        = "S13",
-        go_4        = "S14",
-        go_5        = "S15",
-        go_6        = "S16",
-        go_7        = "S17",
-        go_8        = "S18",
-        ask_mode    = "S20",
-        switch_set  = "S21",
-        switch_real = "S22",
-        get_Isld    = "S31",
-        get_T       = "S32",
-        get_pdi     = "S33",
-        switch_25   = "S41",
-        switch_55   = "S40";
-        /** */
-    }
-    commands_list;
+    const static inline Commands_list commands_list;
 
     /** state changing interface functions*/
 
@@ -71,10 +70,11 @@ public:
     void execute_current_command ();
     void execute_single_command (const std::string& command);
     void go_next_command();
-    answer_imp_type read_answer() ;
     bool end_commands ();
-    const answer_imp_type get_current_command();
-    const answer_imp_type get_current_answer();
+
+    const std::string read_answer() ;
+    const std::string get_current_command();
+    const std::string get_current_answer();
 private:
     void _commands_pool_init();
     void _check_end();
@@ -83,9 +83,9 @@ private:
     /** state members*/
     commands_pool                _commands_pool;
     commands_sequence*           _current_commands_sequence;
-    command_impl_type            _current_command;
+    std::string                  _current_command;
     commands_sequence::iterator  _current_command_seq_it;
-    answer_imp_type              _answer;
+    std::string                  _answer;
     bool                         _end_of_branch{false};
 };
 #endif // M_MODEL_H
