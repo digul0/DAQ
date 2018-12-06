@@ -25,7 +25,8 @@ public:
     explicit m_open_port (unsigned int numPort);
     m_open_port(const m_open_port&) = delete;
     m_open_port& operator=(const m_open_port&) = delete;
-    m_open_port(m_open_port&&) = default;
+    m_open_port(m_open_port&&);
+    m_open_port& operator=(m_open_port&&);//=default;
     ~m_open_port();
 
     // Interface functions
@@ -43,7 +44,7 @@ private:
     unsigned int _num_of_port;
     const std::string _port_init_string;
     HANDLE _com_port_handle;
-    bool _failure; //rename to port_is_open
+    bool _valid; //rename to _valid, reverse logic
 };
 #endif // M_OPEN_PORT_H
 

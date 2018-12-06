@@ -66,7 +66,6 @@ void m_controller::do_branch_full()
                 {
                     if (++try_counter > 3)
                         {
-// TODO (digul0#1#): Add to message what answers were invalid
                             throw logic_error("IO error: invalid answer recieved three times!");
                         }
                     model->execute_current_command(); //try ex

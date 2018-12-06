@@ -16,14 +16,27 @@ m_open_port::m_open_port(unsigned int numPort):
     _num_of_port(numPort),
     _port_init_string("\\\\.\\COM"),
     _com_port_handle(nullptr),
-    _failure(true)
+    _valid(false)
 {
     if ( open() )
         init();
 }
+m_open_port::m_open_port(m_open_port&& rhs):
+    _num_of_port(rhs._num_of_port),
+    _port_init_string (rhs._port_init_string),
+    _com_port_handle (rhs._com_port_handle),
+    _valid (rhs._valid)
+{
+    rhs._valid = false; //rename to _valid, reverse logic
+}
+m_open_port& m_open_port::operator=(m_open_port&& rhs)
+{
+  if (this!=&rhs) m_open_port(std::move(rhs));
+  return *this;
+}
 m_open_port::~m_open_port()
 {
-    if(!_failure)
+    if(_valid)
         close();
 }
 bool m_open_port::open()
@@ -34,9 +47,9 @@ bool m_open_port::open()
                                          + std::to_string(_num_of_port)).c_str();
             _com_port_handle = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE,
                                    0, nullptr, OPEN_EXISTING, 0, nullptr);
-            _failure = (_com_port_handle == INVALID_HANDLE_VALUE);
+            _valid = (_com_port_handle != INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
-            if (!_failure)
+            if (_valid)
             {
               m_log(m_log::other::to_setted_log_file)
                      <<"Port "<<_num_of_port<<" is opened!"<<'\n';
@@ -44,18 +57,18 @@ bool m_open_port::open()
             }
 
 #endif // OPEN_CLOSE_LOG_ON
-            if (_failure)
+            if (!_valid)
                 {
                     throw logic_error(string("IO error: Can't open port: COM")
                                       + std::to_string(_num_of_port)) ;
                 }
         }
-    return !_failure;
+    return _valid;
 }
 
 void m_open_port::init()
 {
-//structs DCB è COMMTIMEOUTS copied from port tuned by using TeraTerm.
+//structs DCB and COMMTIMEOUTS copied from port tuned by using TeraTerm.
     DCB dcb = {};
     dcb.DCBlength =             sizeof(DCB)/*28*/;
     dcb.BaudRate =             9600;
@@ -85,7 +98,7 @@ void m_open_port::close()
     if (is_valid())
         {
             CloseHandle(_com_port_handle);
-            _failure = true;
+            _valid = false;
             _com_port_handle = nullptr;
 #ifdef OPEN_CLOSE_LOG_ON
             m_log(m_log::other::to_setted_log_file)
@@ -100,7 +113,7 @@ void m_open_port::write_raw(const std::string& command)
       Data transmit by protocol structure is: [ASCII command][CL+LF].
     */
     //static const char eol[] = "\n";
-    if (!this->is_valid() || command.empty())
+    if (!is_valid() || command.empty())
         return;
     constexpr char CRLF[2] = {'\r','\n'};
     DWORD bytes_written = 0;
@@ -120,21 +133,28 @@ const string m_open_port::read_raw()
     if (!is_valid())
         return {};
 
-    char buf[30]      = {};
+    char buf[256]      = {};
     DWORD sz_buf = sizeof(buf)/sizeof(*buf);
     constexpr char CRLF[2] = {'\r','\n'};
     // Handler of invalid answer event.
     size_t try_counter = 0;
-    DWORD bytes_read  =  0;
-    size_t temp_br = bytes_read;
+    DWORD total_bytes_read = 0,
+          bytes_read = 0;
     auto findCRLF = cend(buf);
         do
             {
                 if (++try_counter > 3) return "";//handle this obviously invalid answer later
                 //add delay before new try
-                if ( try_counter > 1 ) std::this_thread::sleep_for(100ms);
-                ReadFile (_com_port_handle, &buf[temp_br], sz_buf, &bytes_read, nullptr);
-                temp_br+= bytes_read;
+                if ( try_counter > 1 )
+                {
+                std::this_thread::sleep_for(100ms);
+                m_log()<<"I read the shit!"<<'\n';
+                }
+
+                ReadFile (_com_port_handle, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
+                total_bytes_read+= bytes_read;
+                if (total_bytes_read > sz_buf)
+                  throw logic_error(string("IO error: reseived too long bytes sequence: ") + string(buf, sizeof(buf)) );
                 findCRLF = std::search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
             }
         while ( findCRLF==cend(buf) );
@@ -144,7 +164,7 @@ const string m_open_port::read_raw()
 
 bool m_open_port::is_valid() const
 {
-    return !_failure;
+    return _valid;
 }
 
 const std::string m_open_port::get_portNum() const

@@ -59,6 +59,8 @@ public:
     explicit m_model(const Settings::settings_struct& ss );
     m_model(const m_model&) = delete;
     m_model& operator=(const m_model&) = delete;
+    m_model(m_model&&);
+    m_model& operator=(m_model&&);
     ~m_model();// = default;
 
     /** Struct contained list of aviable commands for IO*/
@@ -71,15 +73,15 @@ public:
     void execute_single_command (const std::string& command);
     void go_next_command();
     bool end_commands ();
-
+    bool open_connection();
     const std::string read_answer() ;
     const std::string get_current_command();
     const std::string get_current_answer();
 private:
     void _commands_pool_init();
     void _check_end();
-
-    std::unique_ptr<m_open_port>  _port;
+    int                           _port_num;
+    std::unique_ptr<m_open_port>  _port_impl;
     /** state members*/
     commands_pool                _commands_pool;
     commands_sequence*           _current_commands_sequence;

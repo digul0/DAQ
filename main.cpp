@@ -11,9 +11,9 @@
 #include "windows.h"
 // TODO (digul0#1#): Add project description
 #ifdef BUILD_DLL
-    #define DLL_EXPORT __declspec(dllexport)
+#define DLL_EXPORT __declspec(dllexport)
 #else
-    #define DLL_EXPORT
+#define DLL_EXPORT
 #endif
 using namespace std;
 
@@ -21,8 +21,8 @@ extern "C"
 int DLL_EXPORT main_process();
 int main()
 {
-  main_process();
-  return 0;
+    main_process();
+    return 0;
 }
 
 //signal flag threads to prepare exit
@@ -41,8 +41,8 @@ int DLL_EXPORT main_process()
     try
         {
             settings =
-            Settings::SettingsParser().get_settings_struct("Portmap.ini",
-                                                                       "Job.ini");
+                Settings::SettingsParser().get_settings_struct("Portmap.ini",
+                        "Job.ini");
         }
     catch(exception& ex)
         {
@@ -61,18 +61,17 @@ int DLL_EXPORT main_process()
     */
     auto process = [&global_results_storage](auto settings_struct)
     {
+        // do not brake init order: model, view, controller
+        m_model m (settings_struct);
+        m_view v;
+        m_controller c(settings_struct);
+        v.setModel(&m);
+        c.setInterruptFlag(&stop_thread_flag);
+        c.setModel(&m);
+        c.setView(&v);
         try
             {
-              // do not brake init order: model, view, controller
-                m_model m (settings_struct);
-                m_view v;
-                m_controller c(settings_struct);
-
-                v.setModel(&m);
-                c.setInterruptFlag(&stop_thread_flag);
-                c.setModel(&m);
-                c.setView(&v);
-
+                m.open_connection();
                 c.acqure_temperature();
                 if (c.test_temperature())
                     {
@@ -82,24 +81,25 @@ int DLL_EXPORT main_process()
                     {
                         c.acquire_25();
                     }
-                // thread-safe writing from local_results_storage
-                // to global_results_storage.
-                {
-                    static mutex global_storage_mutex;
-                    unique_lock<mutex> ul(global_storage_mutex);
-                    auto local_results_storage = c.get_local_results_storage();
-                    std::move(local_results_storage.begin(),
-                              local_results_storage.end(),
-                              back_insert_iterator(global_results_storage));
-                }
+
             }
         catch (exception& ex)
             {
                 // any exception lead to exit thread
                 m_log()<< ex.what() << '\n';
                 m_log(m_log::other::to_setted_log_file)<< ex.what() <<'\n';
-                return;
             }
+        // thread-safe writing from local_results_storage
+        // to global_results_storage.
+        {
+            static mutex global_storage_mutex;
+            unique_lock<mutex> ul(global_storage_mutex);
+            auto local_results_storage = c.get_local_results_storage();
+            std::move(local_results_storage.begin(),
+                      local_results_storage.end(),
+                      back_insert_iterator(global_results_storage));
+        }
+        return;
     };
 
     /** Threads launch
@@ -146,38 +146,38 @@ int DLL_EXPORT main_process()
     // log of measurments.
     for (size_t i = 0; i < global_results_storage.size(); i++)
         {
-     out << fixed
-         << global_results_storage[i].Position << " "
-         << global_results_storage[i].Serial << " "
-         << setprecision(1) << showpoint << global_results_storage[i].I_SLD_SET << " "
-         << setprecision(0) << noshowpoint << global_results_storage[i].T_SET_Ohm << " "
-         << setprecision(3) << showpoint << global_results_storage[i].T_SET << " "
-         << setprecision(1) << showpoint << global_results_storage[i].LIMIT << " "
-         << setprecision(1) << showpoint << global_results_storage[i].I_SLD_REAL << " "
-         << setprecision(0) << noshowpoint << global_results_storage[i].T_REAL_Ohm << " "
-         << setprecision(3) << showpoint << global_results_storage[i].T_REAL << " "
-         << setprecision(3) << showpoint << global_results_storage[i].PD_INT_average << " "
-         << setprecision(3) << showpoint << global_results_storage[i].PD_INT_error << " "
-         << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_average << " "
-         << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_error << " "
-         << '\n';
+            out << fixed
+                << global_results_storage[i].Position << " "
+                << global_results_storage[i].Serial << " "
+                << setprecision(1) << showpoint << global_results_storage[i].I_SLD_SET << " "
+                << setprecision(0) << noshowpoint << global_results_storage[i].T_SET_Ohm << " "
+                << setprecision(3) << showpoint << global_results_storage[i].T_SET << " "
+                << setprecision(1) << showpoint << global_results_storage[i].LIMIT << " "
+                << setprecision(1) << showpoint << global_results_storage[i].I_SLD_REAL << " "
+                << setprecision(0) << noshowpoint << global_results_storage[i].T_REAL_Ohm << " "
+                << setprecision(3) << showpoint << global_results_storage[i].T_REAL << " "
+                << setprecision(3) << showpoint << global_results_storage[i].PD_INT_average << " "
+                << setprecision(3) << showpoint << global_results_storage[i].PD_INT_error << " "
+                << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_average << " "
+                << setprecision(3) << showpoint << global_results_storage[i].PD_EXT_error << " "
+                << '\n';
         }
     return 0;
 }
 void exit_handler(int)
 {
-  using namespace std::chrono_literals;
-  auto delay_before_exit = 5s;
-  stop_thread_flag.store(true);
-  //compiler cut this wait foo
-  std::this_thread::sleep_for(delay_before_exit);
-  return ;
+    using namespace std::chrono_literals;
+    auto delay_before_exit = 5s;
+    stop_thread_flag.store(true);
+    //compiler cut this wait foo
+    std::this_thread::sleep_for(delay_before_exit);
+    return ;
 }
 #ifdef BUILD_DLL
 extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     switch (fdwReason)
-    {
+        {
         case DLL_PROCESS_ATTACH:
             // attach to process
             // return FALSE to fail DLL load
@@ -194,7 +194,7 @@ extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
         case DLL_THREAD_DETACH:
             // detach from thread
             break;
-    }
+        }
     return TRUE; // succesful
 }
 #endif
