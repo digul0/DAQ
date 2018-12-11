@@ -7,7 +7,7 @@
 // forward declarations
 class m_model;
 class m_view;
-namespace Settings
+namespace settings
 {
 struct settings_struct;
 }
@@ -20,7 +20,7 @@ class m_controller
     * analysis of incoming responses, error handling and generation of an output data.
     */
 public:
-    explicit m_controller(const Settings::settings_struct& ss);
+    explicit m_controller(const settings::settings_struct& ss);
     m_controller(const m_controller&) = delete;
     m_controller& operator=(const m_controller&) = delete;
     ~m_controller();

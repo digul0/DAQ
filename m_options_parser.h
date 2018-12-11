@@ -6,7 +6,7 @@
 
 #include "common_std_headers.h"
 
-namespace Settings
+namespace settings
 {
 /**
 * @brief
@@ -32,20 +32,19 @@ struct settings_struct
     int receptacle;
     int temperature_mode;
 };
-
+/*
 class SettingsReader
 {
 public:
     explicit SettingsReader( const std::string& ini_name ) : _filename(ini_name), _f(ini_name) {}
     SettingsReader( const SettingsReader& )  =  delete;
-    enum class have_header
-    {    have,    no_have  };
-    std::string read_settings_to_whole_string(have_header h = have_header::no_have) const;
+    enum class have_header    {have, no_have};
+    std::string file_to_string(have_header h = have_header::no_have) const;
 private:
     const std::string _filename;
     mutable std::ifstream _f;
 };
-
+*/
 
 class SettingsParser
 {
@@ -54,5 +53,8 @@ public:
     get_settings_struct (const std::string& _portmap_ini_name, const std::string& _job_ini_name );
 
 };
+
+enum class have_header    {have, no_have};
+std::string file_to_string(const std::string& file_name, have_header h = have_header::no_have);
 } //end Settings namespace
 #endif // M_OPTIONS_PARSER_H

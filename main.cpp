@@ -36,12 +36,12 @@ int DLL_EXPORT main_process()
     vector<m_controller::ResultsStorage> global_results_storage;
     // fixate run timepoint
     auto now_time_point = std::chrono::system_clock::now();
-    vector<Settings::settings_struct> settings {};
+    vector<settings::settings_struct> settings {};
     // try to read settings
     try
         {
             settings =
-                Settings::SettingsParser().get_settings_struct("Portmap.ini",
+                settings::SettingsParser().get_settings_struct("Portmap.ini",
                         "Job.ini");
         }
     catch(exception& ex)
@@ -66,7 +66,7 @@ int DLL_EXPORT main_process()
         m_view v;
         m_controller c(settings_struct);
         v.setModel(&m);
-        c.setInterruptFlag(&stop_thread_flag);
+        c.setInterruptFlag(&::stop_thread_flag);
         c.setModel(&m);
         c.setView(&v);
         try

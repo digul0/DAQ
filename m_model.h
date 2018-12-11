@@ -5,7 +5,7 @@
 
 
 //forward declarations
-namespace Settings
+namespace settings
 {
     struct settings_struct;
 }
@@ -56,7 +56,7 @@ public:
         switch_to_default = 4
     };
 
-    explicit m_model(const Settings::settings_struct& ss );
+    explicit m_model(const settings::settings_struct& ss );
     m_model(const m_model&) = delete;
     m_model& operator=(const m_model&) = delete;
     m_model(m_model&&);

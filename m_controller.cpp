@@ -11,7 +11,7 @@ using namespace std::chrono_literals;
 using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 using std::logic_error;
 
-m_controller::m_controller(const Settings::settings_struct& ss):
+m_controller::m_controller(const settings::settings_struct& ss):
     _block_place(ss.position),
     _temperature_mode(ss.temperature_mode),
     _receptacle(ss.receptacle),

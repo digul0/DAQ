@@ -3,7 +3,7 @@
 #include "m_open_port.h"
 #include "m_log.h"
 using namespace std::chrono_literals;
-m_model::m_model(const Settings::settings_struct& ss):
+m_model::m_model(const settings::settings_struct& ss):
     _port_num(ss.port), _port_impl(nullptr)
 {
     _commands_pool_init();
