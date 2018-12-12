@@ -22,7 +22,7 @@ bool m_model::open_connection()
  */
 void m_model::_commands_pool_init()
 {
-    commands_sequence test_t =
+    commands_sequence acqure_temperature =
     {
         commands_list.ask_name,
         commands_list.switch_set,
@@ -136,12 +136,16 @@ void m_model::_commands_pool_init()
         commands_list.switch_real,
         commands_list.switch_55
     };
-    //Strict adding order
-    _commands_pool.push_back(std::move(test_t));
-    _commands_pool.push_back(std::move(acquire_25));
-    _commands_pool.push_back(std::move(switch_up));
-    _commands_pool.push_back(std::move(switch_down));
-    _commands_pool.push_back(std::move(switch_to_default));
+    _commands_pool.emplace(m_model::CommandsPoolId::acqure_temperature,
+                           std::move(acqure_temperature));
+    _commands_pool.emplace(m_model::CommandsPoolId::acquire_25,
+                           std::move(acquire_25));
+    _commands_pool.emplace(m_model::CommandsPoolId::switch_up,
+                           std::move(switch_up));
+    _commands_pool.emplace(m_model::CommandsPoolId::switch_down,
+                           std::move(switch_down));
+    _commands_pool.emplace(m_model::CommandsPoolId::switch_to_default,
+                           std::move(switch_to_default));
 
 
 }
@@ -179,7 +183,9 @@ m_model::read_answer()
 //Choosing branch and recheck model::_end_of_branch value
 void m_model::choose_commands_pool(CommandsPoolId poolid)
 {
-    _current_commands_sequence = &_commands_pool[static_cast<unsigned int> (poolid)];
+    auto find_it =_commands_pool.find(poolid);
+    if ( find_it==_commands_pool.end()) throw std::logic_error ("Set of commands_sequence incorrect!");
+    _current_commands_sequence = &find_it->second;//may return end();
     _current_command_seq_it    = _current_commands_sequence->begin();
     _check_end();
 }

@@ -43,9 +43,6 @@ class m_model
     * Provides an interface for selecting and executing a precompiled command flow,
     * as well as receiving a response from the com port.
     */
-    using commands_sequence = std::vector<std::string>; // commands sequence
-    using commands_pool = std::vector<commands_sequence>; // all commands sequence pool
-
 public:
     enum class CommandsPoolId
     {
@@ -78,11 +75,15 @@ public:
     const std::string get_current_command();
     const std::string get_current_answer();
 private:
+    using commands_sequence = std::vector<std::string>; // commands sequence
+    using commands_pool = std::map<CommandsPoolId, commands_sequence>; // all commands sequence pool
+
     void _commands_pool_init();
     void _check_end();
     int                           _port_num;
     std::unique_ptr<m_open_port>  _port_impl;
     /** state members*/
+
     commands_pool                _commands_pool;
     commands_sequence*           _current_commands_sequence;
     std::string                  _current_command;
