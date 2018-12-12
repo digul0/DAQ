@@ -174,7 +174,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
 
 void m_controller::acqure_temperature()
 {
-    model->choose_commands_pool(m_model::CommandsPoolName::acqure_temperature);
+    model->choose_commands_pool(m_model::CommandsPoolId::acqure_temperature);
     do_branch_full();
 }
 
@@ -204,7 +204,7 @@ bool m_controller::test_temperature()
 }
 void m_controller::acquire_25()
 {
-    model->choose_commands_pool(m_model::CommandsPoolName::acquire_25);
+    model->choose_commands_pool(m_model::CommandsPoolId::acquire_25);
     do_branch_full();
 }
 
@@ -220,7 +220,7 @@ void sleep_for_with_condition(Time_duration t, Call foo)
 }
 void m_controller::acquire_55()
 {
-    model->choose_commands_pool(m_model::CommandsPoolName::switch_down);
+    model->choose_commands_pool(m_model::CommandsPoolId::switch_down);
     do_branch_full();
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
     // Wait while temperature balanced.
@@ -231,7 +231,7 @@ void m_controller::acquire_55()
     }
                             );
     acquire_25();
-    model->choose_commands_pool(m_model::CommandsPoolName::switch_up);
+    model->choose_commands_pool(m_model::CommandsPoolId::switch_up);
     do_branch_full();
 }
 

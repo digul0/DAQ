@@ -47,7 +47,7 @@ class m_model
     using commands_pool = std::vector<commands_sequence>; // all commands sequence pool
 
 public:
-    enum class CommandsPoolName
+    enum class CommandsPoolId
     {
         acqure_temperature = 0,
         acquire_25 = 1,
@@ -68,7 +68,7 @@ public:
 
     /** state changing interface functions*/
 
-    void choose_commands_pool(CommandsPoolName choose);
+    void choose_commands_pool(CommandsPoolId poolid);
     void execute_current_command ();
     void execute_single_command (const std::string& command);
     void go_next_command();

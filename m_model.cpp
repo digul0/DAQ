@@ -177,9 +177,9 @@ m_model::read_answer()
     return _answer = _port_impl->read_raw();
 }
 //Choosing branch and recheck model::_end_of_branch value
-void m_model::choose_commands_pool(CommandsPoolName choose)
+void m_model::choose_commands_pool(CommandsPoolId poolid)
 {
-    _current_commands_sequence = &_commands_pool[static_cast<unsigned int> (choose)];
+    _current_commands_sequence = &_commands_pool[static_cast<unsigned int> (poolid)];
     _current_command_seq_it    = _current_commands_sequence->begin();
     _check_end();
 }
