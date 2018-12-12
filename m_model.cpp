@@ -159,7 +159,7 @@ void  m_model::execute_single_command (const std::string& command)
 {
     _current_command = command;
     if (_port_impl)
-    _port_impl->write_raw(_current_command);
+    _port_impl->write_line(_current_command);
     else  throw std::logic_error("Port not opened!");
 }
 void m_model::go_next_command()
@@ -178,7 +178,7 @@ void m_model::_check_end()
 const std::string
 m_model::read_answer()
 {
-    return _answer = _port_impl->read_raw();
+    return _answer = _port_impl->read_line();
 }
 //Choosing branch and recheck model::_end_of_branch value
 void m_model::choose_commands_pool(CommandsPoolId poolid)

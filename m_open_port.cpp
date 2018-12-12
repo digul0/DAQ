@@ -21,13 +21,14 @@ m_open_port::m_open_port(unsigned int numPort):
     if ( open() )
         init();
 }
+
 m_open_port::m_open_port(m_open_port&& rhs):
     _num_of_port(rhs._num_of_port),
     _port_init_string (rhs._port_init_string),
     _com_port_handle (rhs._com_port_handle),
     _valid (rhs._valid)
 {
-    rhs._valid = false; //rename to _valid, reverse logic
+    rhs._valid = false;
 }
 m_open_port& m_open_port::operator=(m_open_port&& rhs)
 {
@@ -107,7 +108,7 @@ void m_open_port::close()
 #endif // OPEN_CLOSE_LOG_ON
         }
 }
-void m_open_port::write_raw(const std::string& command)
+void m_open_port::write_line(const string& command)
 {
     /**
       Data transmit by protocol structure is: [ASCII command][CL+LF].
@@ -119,12 +120,12 @@ void m_open_port::write_raw(const std::string& command)
     DWORD bytes_written = 0;
     flushPort();
     //Send command string without null-terminator
-    const std::string full_command = command + std::string(CRLF);
+    const string full_command = command + string(CRLF);
     size_t full_command_size = command.size() + sizeof(CRLF);
     WriteFile(_com_port_handle, full_command.data(), full_command_size , &bytes_written, nullptr);
     return ;
 }
-const string m_open_port::read_raw()
+const string m_open_port::read_line()
 {
     /**
       Data receive by protocol structure is: [ASCII answer][CL+LF].
@@ -162,12 +163,12 @@ const string m_open_port::read_raw()
     return r;
 }
 
-bool m_open_port::is_valid() const
+bool m_open_port::is_valid();
 {
     return _valid;
 }
 
-const std::string m_open_port::get_portNum() const
+const string m_open_port::get_portNum()
 {
     return string("COM") + std::to_string(_num_of_port);
 }
