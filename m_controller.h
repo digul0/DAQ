@@ -7,10 +7,7 @@
 // forward declarations
 class m_model;
 class m_view;
-namespace settings
-{
-struct settings_struct;
-}
+namespace settings{struct settings_struct;}
 
 class m_controller
 {
@@ -23,7 +20,7 @@ public:
     explicit m_controller(const settings::settings_struct& ss);
     m_controller(const m_controller&) = delete;
     m_controller& operator=(const m_controller&) = delete;
-    ~m_controller();
+    ~m_controller(); //have no-trivial implementation
 
     struct ResultsStorage
     {
@@ -44,7 +41,6 @@ public:
     /* MVC interface functions*/
     void setView(m_view* _view);
     void setModel(m_model* _model);
-    void setInterruptFlag(std::atomic<bool>* interrupt_flag);
 
     /* interface functions*/
     void acqure_temperature();
@@ -56,27 +52,27 @@ public:
 
     void parse_and_push_into_result(const std::vector<std::string> splited_answer);
     std::vector<ResultsStorage> get_local_results_storage();
-    ///interrupted sleep
+
+    /* multithread functions*/
+    void setInterruptFlag(std::atomic<bool>* interrupt_flag);
     template <typename Time_duration, typename Call>
     friend  void sleep_for_with_condition(Time_duration t, Call foo);
 private:
     struct _MiniIOstate
     {
-        int current_channel_number;
-        int current_mode;
+        int  current_channel_number;
+        int  current_mode;
         bool temp_was_switched;
 
         void state_changer(const std::vector<std::string> splited_answer);
     };
-    friend class m_controller::_MiniIOstate;
 
     /* MVC members*/
     m_view* view;
     m_model* model;
 
-    std::string                 _block_place;
-    int                         _temperature_mode;
-    int                         _receptacle;
+    std::unique_ptr<
+    settings::settings_struct>  _settings;
     /// describe device's current state
     _MiniIOstate                _miniIOstate;
     /// delay before commands

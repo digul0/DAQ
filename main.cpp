@@ -62,24 +62,24 @@ int DLL_EXPORT main_process()
     auto process = [&global_results_storage](auto settings_struct)
     {
         // do not brake init order: model, view, controller
-        m_model m (settings_struct);
-        m_view v;
-        m_controller c(settings_struct);
-        v.setModel(&m);
-        c.setInterruptFlag(&::stop_thread_flag);
-        c.setModel(&m);
-        c.setView(&v);
+        m_model model (settings_struct);
+        m_view view;
+        m_controller controller(settings_struct);
+        view.setModel(&model);
+        controller.setInterruptFlag(&::stop_thread_flag);
+        controller.setModel(&model);
+        controller.setView(&view);
         try
             {
-                m.open_connection();
-                c.acqure_temperature();
-                if (c.test_temperature())
+                model.open_connection();
+                controller.acqure_temperature();
+                if (controller.test_temperature())
                     {
-                        c.acquire_55();
+                        controller.acquire_55();
                     }
                 else
                     {
-                        c.acquire_25();
+                        controller.acquire_25();
                     }
 
             }
@@ -94,7 +94,7 @@ int DLL_EXPORT main_process()
         {
             static mutex global_storage_mutex;
             unique_lock<mutex> ul(global_storage_mutex);
-            auto local_results_storage = c.get_local_results_storage();
+            auto local_results_storage = controller.get_local_results_storage();
             std::move(local_results_storage.begin(),
                       local_results_storage.end(),
                       back_insert_iterator(global_results_storage));
@@ -106,7 +106,7 @@ int DLL_EXPORT main_process()
         one thread to each position in options
     */
     vector<thread> pool;
-    for (auto& ss : settings)
+    for (const auto& ss : settings)
         {
             pool.emplace_back(process, ss);
         }
@@ -117,7 +117,8 @@ int DLL_EXPORT main_process()
     // Wait untile threads finished
     // and when sorting by position order.
     sort(global_results_storage.begin(), global_results_storage.end(),
-         [](m_controller::ResultsStorage& value1, m_controller::ResultsStorage& value2)
+         [](const m_controller::ResultsStorage& value1,
+            const m_controller::ResultsStorage& value2)
     {
         return value1.Position < value2.Position;
     }

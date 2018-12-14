@@ -145,17 +145,10 @@ const string m_open_port::read_line()
         do
             {
                 if (++try_counter > 3) return "";//handle this obviously invalid answer later
-                //add delay before new try
-                if ( try_counter > 1 )
-                {
-                std::this_thread::sleep_for(100ms);
-                m_log()<<"I read the shit!"<<'\n';
-                }
-
                 ReadFile (_com_port_handle, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
                 total_bytes_read+= bytes_read;
                 if (total_bytes_read > sz_buf)
-                  throw logic_error(string("IO error: reseived too long bytes sequence: ") + string(buf, sizeof(buf)) );
+                    throw logic_error(string("IO error: reseived too long bytes sequence: ") + string(buf, sizeof(buf)) );
                 findCRLF = std::search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
             }
         while ( findCRLF==cend(buf) );
@@ -163,7 +156,7 @@ const string m_open_port::read_line()
     return r;
 }
 
-bool m_open_port::is_valid();
+bool m_open_port::is_valid()
 {
     return _valid;
 }

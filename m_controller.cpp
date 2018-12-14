@@ -12,9 +12,10 @@ using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 using std::logic_error;
 
 m_controller::m_controller(const settings::settings_struct& ss):
-    _block_place(ss.position),
-    _temperature_mode(ss.temperature_mode),
-    _receptacle(ss.receptacle),
+    _settings(std::make_unique<settings::settings_struct>(ss)),
+    //_block_place(ss.position),
+    //_temperature_mode(ss.temperature_mode),
+    //_receptacle(ss.receptacle),
     _miniIOstate({0,0,false}),
     _delay(500ms),
     _local_results_storage(vector<ResultsStorage>(_num_of_positions))
@@ -88,12 +89,12 @@ void m_controller::do_branch_full()
 //                  << _miniIOstate.temp_was_switched
 //                  << '\n';
             parse_and_push_into_result(splited_answer);
-            m_log() << _block_place
+            m_log() << _settings->position
                     << " : "  << model->get_current_command()
                     << " << " << model->get_current_answer()
                     << '\n';
             m_log(m_log::other::to_setted_log_file)
-                    << _block_place
+                    << _settings->position
                     << " : "  << model->get_current_command()
                     << " << " << model->get_current_answer()
                     << '\n';
@@ -119,7 +120,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
             for (size_t i = 0; i < _num_of_positions ; ++i )
                 {
                     _local_results_storage[i].Serial = serial;
-                    _local_results_storage[i].Position = _block_place + "-" + to_string(i + 1);
+                    _local_results_storage[i].Position = _settings->position + "-" + to_string(i + 1);
                 }
 
         }
@@ -135,7 +136,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
                     _miniIOstate.current_mode!= mode
                )
                 throw logic_error(string("Don't push any buttons on the device ")
-                                  + _block_place + "\nwhile taking measurements!" );
+                                  + _settings->position + "\nwhile taking measurements!" );
             if (mode == SET)
                 {
                     if      (param_num == 1)
@@ -188,7 +189,7 @@ void m_controller::acqure_temperature()
 bool m_controller::test_temperature()
 {
     enum {TEMP_MODE_DEFAULT = 0, TEMP_MODE_NOSWITCH = 1 };
-    if (_temperature_mode == TEMP_MODE_NOSWITCH )
+    if (_settings->temperature_mode == TEMP_MODE_NOSWITCH )
         return false; // ->skip test by options requirements
     constexpr double deviance = 0.25 ; //%
     constexpr double ambient_temperature = 25.0;
@@ -208,7 +209,7 @@ void m_controller::acquire_25()
     do_branch_full();
 }
 
-
+///interrupted sleep
 template <typename Time_duration, typename Call>
 void sleep_for_with_condition(Time_duration t, Call foo)
 {
