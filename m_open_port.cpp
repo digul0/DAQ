@@ -13,22 +13,22 @@ using std::logic_error;
 
 ///Construct m_open_port
 m_open_port::m_open_port(unsigned int numPort):
-    _num_of_port(numPort),
-    _port_init_string("\\\\.\\COM"),
-    _com_port_handle(nullptr),
-    _valid(false)
+    num_of_port_(numPort),
+    port_init_string_("\\\\.\\COM"),
+    com_port_handle_(nullptr),
+    valid_(false)
 {
     if ( open() )
         init();
 }
 
 m_open_port::m_open_port(m_open_port&& rhs):
-    _num_of_port(rhs._num_of_port),
-    _port_init_string (rhs._port_init_string),
-    _com_port_handle (rhs._com_port_handle),
-    _valid (rhs._valid)
+    num_of_port_(rhs.num_of_port_),
+    port_init_string_ (rhs.port_init_string_),
+    com_port_handle_ (rhs.com_port_handle_),
+    valid_ (rhs.valid_)
 {
-    rhs._valid = false;
+    rhs.valid_ = false;
 }
 m_open_port& m_open_port::operator=(m_open_port&& rhs)
 {
@@ -37,34 +37,34 @@ m_open_port& m_open_port::operator=(m_open_port&& rhs)
 }
 m_open_port::~m_open_port()
 {
-    if(_valid)
+    if(valid_)
         close();
 }
 bool m_open_port::open()
 {
-    if( _com_port_handle ==  nullptr )
+    if( com_port_handle_ ==  nullptr )
         {
-            const char *full_com_name = (_port_init_string
-                                         + std::to_string(_num_of_port)).c_str();
-            _com_port_handle = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE,
+            const char *full_com_name = (port_init_string_
+                                         + std::to_string(num_of_port_)).c_str();
+            com_port_handle_ = CreateFile( full_com_name, GENERIC_READ|GENERIC_WRITE,
                                    0, nullptr, OPEN_EXISTING, 0, nullptr);
-            _valid = (_com_port_handle != INVALID_HANDLE_VALUE);
+            valid_ = (com_port_handle_ != INVALID_HANDLE_VALUE);
 #ifdef OPEN_CLOSE_LOG_ON
-            if (_valid)
+            if (valid_)
             {
               m_log(m_log::other::to_setted_log_file)
-                     <<"Port "<<_num_of_port<<" is opened!"<<'\n';
-              m_log()<<"Port "<<_num_of_port<<" is opened!"<<'\n';
+                     <<"Port "<<num_of_port_<<" is opened!"<<'\n';
+              m_log()<<"Port "<<num_of_port_<<" is opened!"<<'\n';
             }
 
 #endif // OPEN_CLOSE_LOG_ON
-            if (!_valid)
+            if (!valid_)
                 {
                     throw logic_error(string("IO error: Can't open port: COM")
-                                      + std::to_string(_num_of_port)) ;
+                                      + std::to_string(num_of_port_)) ;
                 }
         }
-    return _valid;
+    return valid_;
 }
 
 void m_open_port::init()
@@ -84,13 +84,13 @@ void m_open_port::init()
 
     DCB dcb_current = {};
     COMMTIMEOUTS timeouts_current = {};
-    GetCommState(_com_port_handle, &dcb_current);
-    GetCommTimeouts(_com_port_handle, &timeouts_current);
+    GetCommState(com_port_handle_, &dcb_current);
+    GetCommTimeouts(com_port_handle_, &timeouts_current);
 
     if ( memcmp(&dcb_current,&dcb, sizeof(DCB) )!=0 )
-        SetCommState(_com_port_handle, &dcb);
+        SetCommState(com_port_handle_, &dcb);
     if ( memcmp(&timeouts_current,&timeouts, sizeof(COMMTIMEOUTS) )!=0 )
-        SetCommTimeouts(_com_port_handle, &timeouts);
+        SetCommTimeouts(com_port_handle_, &timeouts);
 
 }
 
@@ -98,13 +98,13 @@ void m_open_port::close()
 {
     if (is_valid())
         {
-            CloseHandle(_com_port_handle);
-            _valid = false;
-            _com_port_handle = nullptr;
+            CloseHandle(com_port_handle_);
+            valid_ = false;
+            com_port_handle_ = nullptr;
 #ifdef OPEN_CLOSE_LOG_ON
             m_log(m_log::other::to_setted_log_file)
-                    << "Port COM" << _num_of_port << " closed!" << '\n';
-            m_log() << "Port COM" << _num_of_port << " closed!" << '\n';
+                    << "Port COM" << num_of_port_ << " closed!" << '\n';
+            m_log() << "Port COM" << num_of_port_ << " closed!" << '\n';
 #endif // OPEN_CLOSE_LOG_ON
         }
 }
@@ -122,7 +122,7 @@ void m_open_port::write_line(const string& command)
     //Send command string without null-terminator
     const string full_command = command + string(CRLF);
     size_t full_command_size = command.size() + sizeof(CRLF);
-    WriteFile(_com_port_handle, full_command.data(), full_command_size , &bytes_written, nullptr);
+    WriteFile(com_port_handle_, full_command.data(), full_command_size , &bytes_written, nullptr);
     return ;
 }
 const string m_open_port::read_line()
@@ -145,7 +145,7 @@ const string m_open_port::read_line()
         do
             {
                 if (++try_counter > 3) return "";//handle this obviously invalid answer later
-                ReadFile (_com_port_handle, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
+                ReadFile (com_port_handle_, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
                 total_bytes_read+= bytes_read;
                 if (total_bytes_read > sz_buf)
                     throw logic_error(string("IO error: reseived too long bytes sequence: ") + string(buf, sizeof(buf)) );
@@ -158,19 +158,19 @@ const string m_open_port::read_line()
 
 bool m_open_port::is_valid()
 {
-    return _valid;
+    return valid_;
 }
 
 const string m_open_port::get_portNum()
 {
-    return string("COM") + std::to_string(_num_of_port);
+    return string("COM") + std::to_string(num_of_port_);
 }
 
 void m_open_port::flushPort(void)
 {
     if (is_valid())
         {
-            PurgeComm(_com_port_handle, PURGE_RXCLEAR | PURGE_RXABORT);
-            PurgeComm(_com_port_handle, PURGE_TXCLEAR | PURGE_TXABORT);
+            PurgeComm(com_port_handle_, PURGE_RXCLEAR | PURGE_RXABORT);
+            PurgeComm(com_port_handle_, PURGE_TXCLEAR | PURGE_TXABORT);
         }
 }

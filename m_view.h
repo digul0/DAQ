@@ -30,10 +30,10 @@ public:
     std::vector<std::string> split_answer(const std::string& answer);
     bool is_valid_answer(const std::string& answer);
 private:
-    bool _is_expected_answer(const std::string& answer);
-    bool _is_regex_compatible_answer(const std::string& answer);
+    bool is_expected_answer(const std::string& answer);
+    bool is_regex_compatible_answer(const std::string& answer);
     /** MVC members*/
-    m_model* _model;
+    m_model* model_;
 
     /** regexes */
     inline const static

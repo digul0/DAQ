@@ -39,8 +39,8 @@ public:
         double PD_EXT_error;
     };
     /* MVC interface functions*/
-    void setView(m_view* _view);
-    void setModel(m_model* _model);
+    void setView(m_view* view);
+    void setModel(m_model* model);
 
     /* interface functions*/
     void acqure_temperature();
@@ -58,7 +58,7 @@ public:
     template <typename Time_duration, typename Call>
     friend  void sleep_for_with_condition(Time_duration t, Call foo);
 private:
-    struct _MiniIOstate
+    struct MiniIOstate
     {
         int  current_channel_number;
         int  current_mode;
@@ -68,18 +68,18 @@ private:
     };
 
     /* MVC members*/
-    m_view* view;
-    m_model* model;
+    m_view* view_;
+    m_model* model_;
 
     std::unique_ptr<
-    settings::settings_struct>  _settings;
+    settings::settings_struct>  settings_;
     /// describe device's current state
-    _MiniIOstate                _miniIOstate;
+    MiniIOstate                miniIOstate_;
     /// delay before commands
-    std::chrono::milliseconds   _delay;
+    std::chrono::milliseconds   delay_;
     /// Device channels constant
-    constexpr static size_t     _num_of_positions  {8} ;
-    std::vector<ResultsStorage> _local_results_storage;
-    std::atomic<bool>*          _stop_thread_flag_pointer{nullptr};
+    constexpr static size_t     num_of_positions_  {8} ;
+    std::vector<ResultsStorage> local_results_storage_;
+    std::atomic<bool>*          stop_thread_flag_pointer_{nullptr};
 };
 #endif // M_CONTROLLER_H

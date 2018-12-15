@@ -1,7 +1,7 @@
 #include "m_log.h"
 #include <iomanip>
 #include <sstream>
-//std::mutex m_log::_mut;
+//std::mutex m_log::mut_;
 const std::string m_log::make_name_from_time(const std::string name_prefix,
                                        std::chrono::system_clock::time_point tp,
                                        const std::string name_postfix

@@ -71,24 +71,25 @@ public:
     void go_next_command();
     bool end_commands ();
     bool open_connection();
-    const std::string read_answer() ;
+    const std::string read_answer();
     const std::string get_current_command();
     const std::string get_current_answer();
 private:
     using commands_sequence = std::vector<std::string>; // commands sequence
     using commands_pool = std::map<CommandsPoolId, commands_sequence>; // all commands sequence pool
 
-    void _commands_pool_init();
-    void _check_end();
-    int                           _port_num;
-    std::unique_ptr<m_open_port>  _port_impl;
+    void commands_pool_init();
+    void check_end();
+
+    int                           port_num_;
+    std::unique_ptr<m_open_port>  port_impl_;
     /** state members*/
 
-    commands_pool                _commands_pool;
-    commands_sequence*           _current_commands_sequence;
-    std::string                  _current_command;
-    commands_sequence::iterator  _current_command_seq_it;
-    std::string                  _answer;
-    bool                         _end_of_branch{false};
+    commands_pool                commands_pool_;
+    commands_sequence*           current_commands_sequence_;
+    std::string                  current_command_;
+    commands_sequence::iterator  current_command_seq_it_;
+    std::string                  answer_;
+    bool                         end_of_branch_{false};
 };
 #endif // M_MODEL_H

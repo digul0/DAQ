@@ -37,7 +37,7 @@ class SettingsParser
 {
 public:
     std::vector<settings_struct>
-    get_settings_struct (const std::string& _portmap_ini_name, const std::string& _job_ini_name );
+    get_settings_struct (const std::string& portmap_ini_name_, const std::string& job_ini_name_ );
 private:
     std::string file_to_string(const std::string& file_name,  size_t skip_n_first_lines = 0);
 };

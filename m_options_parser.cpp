@@ -12,8 +12,8 @@ using std::string, std::vector, std::map, std::stringstream, std::ifstream,
 namespace settings
 {
 vector<settings_struct>
-SettingsParser::get_settings_struct(const string& _portmap_ini_name,
-                                    const string& _job_ini_name)
+SettingsParser::get_settings_struct(const string& portmap_ini_name_,
+                                    const string& job_ini_name_)
 {
     // Port Position Receptacle Temperature
     // from PortMap.ini.
@@ -24,8 +24,8 @@ SettingsParser::get_settings_struct(const string& _portmap_ini_name,
     const regex options_regex1(options_format);
 
     //get string with content of settings file
-    const string portmap_ini_string = file_to_string(_portmap_ini_name);
-    const string job_ini_string     = file_to_string(_job_ini_name);
+    const string portmap_ini_string = file_to_string(portmap_ini_name_);
+    const string job_ini_string     = file_to_string(job_ini_name_);
 
     map<string, settings_struct> name_to_com_table; //map(posit_string, settings)
     for (sregex_iterator it(portmap_ini_string.begin(),
@@ -81,8 +81,8 @@ SettingsParser::get_settings_struct(const string& _portmap_ini_name,
 
 string SettingsParser::file_to_string( const string& file_name, size_t skip_n_first_lines )
 {
-    ifstream _f {file_name};
-    if (!_f.is_open())
+    ifstream f_ {file_name};
+    if (!f_.is_open())
         throw logic_error(std::string(file_name) + " file not exist!");
     stringstream s;
     //skip n first file lines if it necessary
@@ -90,10 +90,10 @@ string SettingsParser::file_to_string( const string& file_name, size_t skip_n_fi
         {
             while( skip_n_first_lines-- )
                 {
-                    _f.ignore(numeric_limits<std::streamsize>::max(),'\n');
+                    f_.ignore(numeric_limits<std::streamsize>::max(),'\n');
                 }
         }
-    s << _f.rdbuf();
+    s << f_.rdbuf();
     return s.str();
 }
 

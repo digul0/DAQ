@@ -3,11 +3,11 @@
 
 #include "common_std_headers.h"
 
-#ifdef _MSC_VER
+#ifdef MSC_VER_
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif // NOMINMAX
-#endif //_MSC_VER
+#endif //MSC_VER_
 #include "windows.h"
 
 
@@ -41,10 +41,10 @@ private:
     void flushPort();
     bool is_valid();
 
-    unsigned int _num_of_port;
-    const std::string _port_init_string;
-    HANDLE _com_port_handle;
-    bool _valid; //rename to _valid, reverse logic
+    unsigned int num_of_port_;
+    const std::string port_init_string_;
+    HANDLE com_port_handle_;
+    bool valid_; //rename to valid_, reverse logic
 };
 #endif // M_OPEN_PORT_H
 

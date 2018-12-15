@@ -12,7 +12,7 @@ m_view::~m_view()
 
 void m_view::setModel(m_model* model)
 {
-    _model = model;
+    model_ = model;
 }
 
 std::vector<std::string> m_view::split_answer(const std::string& answer)
@@ -56,7 +56,7 @@ std::vector<std::string> m_view::split_answer(const std::string& answer)
 }
 
 //answer.length <=10 and must satisfy "A\d{2,9}" or "AE"
-bool m_view::_is_expected_answer(const std::string& answer)
+bool m_view::is_expected_answer(const std::string& answer)
 {
     auto answer_size = answer.size();
     if (answer_size > 2 && answer_size <=10)
@@ -80,9 +80,9 @@ bool m_view::_is_expected_answer(const std::string& answer)
 }
 //  it restrict quantity of commands in model
 //  maybe not good idea
-bool m_view::_is_regex_compatible_answer(const std::string& answer)
+bool m_view::is_regex_compatible_answer(const std::string& answer)
 {
-    auto command = _model->get_current_command().substr(0,2);
+    auto command = model_->get_current_command().substr(0,2);
     auto command_key = std::move(command.substr(0,2));
     if(     command_key == "S0" )
         {
@@ -112,7 +112,7 @@ bool m_view::_is_regex_compatible_answer(const std::string& answer)
 bool m_view::is_valid_answer(const std::string& answer)
 {
     bool valid =
-        _is_expected_answer(answer) &&
-        _is_regex_compatible_answer(answer);
+        is_expected_answer(answer) &&
+        is_regex_compatible_answer(answer);
     return valid;
 }

@@ -3,24 +3,25 @@
 #include "m_open_port.h"
 #include "m_log.h"
 using namespace std::chrono_literals;
+
 m_model::m_model(const settings::settings_struct& ss):
-    _port_num(ss.port), _port_impl(nullptr)
+    port_num_(ss.port), port_impl_(nullptr)
 {
-    _commands_pool_init();
+    commands_pool_init();
 }
 m_model::m_model(m_model&&)=default;
 m_model& m_model::operator=(m_model&&) =default;
 m_model::~m_model() = default;
 bool m_model::open_connection()
 {
-  _port_impl = std::make_unique<m_open_port>(_port_num); //can throw exceptions
+  port_impl_ = std::make_unique<m_open_port>(port_num_); //can throw exceptions
   return true;
 }
 /**
   Commands sequenses
   Add new sequenses here
  */
-void m_model::_commands_pool_init()
+void m_model::commands_pool_init()
 {
     commands_sequence acqure_temperature =
     {
@@ -136,70 +137,70 @@ void m_model::_commands_pool_init()
         commands_list.switch_real,
         commands_list.switch_55
     };
-    _commands_pool.emplace(m_model::CommandsPoolId::acqure_temperature,
+    commands_pool_.emplace(m_model::CommandsPoolId::acqure_temperature,
                            std::move(acqure_temperature));
-    _commands_pool.emplace(m_model::CommandsPoolId::acquire_25,
+    commands_pool_.emplace(m_model::CommandsPoolId::acquire_25,
                            std::move(acquire_25));
-    _commands_pool.emplace(m_model::CommandsPoolId::switch_up,
+    commands_pool_.emplace(m_model::CommandsPoolId::switch_up,
                            std::move(switch_up));
-    _commands_pool.emplace(m_model::CommandsPoolId::switch_down,
+    commands_pool_.emplace(m_model::CommandsPoolId::switch_down,
                            std::move(switch_down));
-    _commands_pool.emplace(m_model::CommandsPoolId::switch_to_default,
+    commands_pool_.emplace(m_model::CommandsPoolId::switch_to_default,
                            std::move(switch_to_default));
 
 
 }
 void  m_model::execute_current_command ()
 {
-    if (!_end_of_branch)
-        execute_single_command(*_current_command_seq_it);
+    if (!end_of_branch_)
+        execute_single_command(*current_command_seq_it_);
 
 }
 void  m_model::execute_single_command (const std::string& command)
 {
-    _current_command = command;
-    if (_port_impl)
-    _port_impl->write_line(_current_command);
+    current_command_ = command;
+    if (port_impl_)
+    port_impl_->write_line(current_command_);
     else  throw std::logic_error("Port not opened!");
 }
 void m_model::go_next_command()
 {
 
-    if (!_end_of_branch)
-        ++_current_command_seq_it;
-    _check_end();
+    if (!end_of_branch_)
+        ++current_command_seq_it_;
+    check_end();
 
 }
-void m_model::_check_end()
+void m_model::check_end()
 {
-    _end_of_branch = (_current_command_seq_it == _current_commands_sequence->end());
+    end_of_branch_ = (current_command_seq_it_ == current_commands_sequence_->end());
 }
 
 const std::string
 m_model::read_answer()
 {
-    return _answer = _port_impl->read_line();
+    return answer_ = port_impl_->read_line();
 }
-//Choosing branch and recheck model::_end_of_branch value
+//Choosing branch and recheck model::end_of_branch_ value
 void m_model::choose_commands_pool(CommandsPoolId poolid)
 {
-    auto find_it =_commands_pool.find(poolid);
-    if ( find_it==_commands_pool.end()) throw std::logic_error ("Set of commands_sequence incorrect!");
-    _current_commands_sequence = &find_it->second;//may return end();
-    _current_command_seq_it    = _current_commands_sequence->begin();
-    _check_end();
+    auto find_it =commands_pool_.find(poolid);
+    if ( find_it==commands_pool_.end()) throw std::logic_error ("Set of commands_sequence incorrect!");
+    current_commands_sequence_ = &find_it->second;//may return end();
+    current_command_seq_it_    = current_commands_sequence_->begin();
+    check_end();
 }
 bool  m_model::end_commands ()
 {
-    return _end_of_branch;
+    return end_of_branch_;
 }
 const std::string
 m_model::get_current_command()
 {
-    return _current_command;
+    return current_command_;
 }
 const std::string
 m_model::get_current_answer()
 {
-    return _answer;
+    return answer_;
 }

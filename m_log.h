@@ -17,27 +17,27 @@ public:
     enum class other { to_setted_log_file };
 
     // for stdout
-    explicit m_log(std::ostream& out_dest = std::cout ): _out(&out_dest)
+    explicit m_log(std::ostream& out_dest = std::cout ): out_(&out_dest)
     {
 
     }
     // for file
-    explicit m_log(std::ofstream& out_file ): _out(&out_file)
+    explicit m_log(std::ofstream& out_file ): out_(&out_file)
     {
 
     }
     //for setted file
     explicit m_log(m_log::other)
     {
-        if (_p_setted_file!=nullptr)
+        if (p_setted_file_!=nullptr)
             {
-                _out = _p_setted_file;
+                out_ = p_setted_file_;
             }
         else
             throw std::logic_error("out log file not set!");
     }
     m_log(m_log&& rlog) noexcept:
-        _out ( rlog._out), _ss(std::move(rlog._ss))
+        out_ ( rlog.out_), ss_(std::move(rlog.ss_))
     {
 
     }
@@ -45,12 +45,12 @@ public:
     m_log& operator=(const m_log&) = delete;
     ~m_log()
     {
-        if (_out!=nullptr)
-            write_to(*_out);
+        if (out_!=nullptr)
+            write_to(*out_);
     }
     void static setLogfile(std::ofstream* out_file)
     {
-        _p_setted_file = out_file;
+        p_setted_file_ = out_file;
     }
 private:
     template<typename T>
@@ -58,28 +58,28 @@ private:
     {
         auto& relevant_mutex = Mutex_selector<T>::get();
         std::lock_guard<std::mutex> ul(relevant_mutex);
-        *_out << _ss.rdbuf() << std::flush;
+        *out_ << ss_.rdbuf() << std::flush;
     }
     template< typename T>
-    friend m_log&&  operator<<(m_log&&  _m_log, const T& t) noexcept;
+    friend m_log&&  operator<<(m_log&&  m_log_, const T& t) noexcept;
 
-    //inline static std::mutex _mut_console, _mut_file;
-    std::ostream* _out {nullptr};
-    std::stringstream _ss;
-    inline static std::ofstream* _p_setted_file {nullptr};
+    //inline static std::mutex mut_console_, mut_file_;
+    std::ostream* out_ {nullptr};
+    std::stringstream ss_;
+    inline static std::ofstream* p_setted_file_ {nullptr};
 public:
-    static const std::string make_name_from_time (const std::string name_prefix,
-            std::chrono::system_clock::time_point tp,
-            const std::string name_postfix
-                                                 );
+    static const std::string
+    make_name_from_time (const std::string name_prefix,
+                         std::chrono::system_clock::time_point tp,
+                         const std::string name_postfix);
 };
 
 //Atomic output for <<  until m_log object is live
 template< typename T>
-m_log&& operator<<(m_log&& _m_log, const T& t ) noexcept
+m_log&& operator<<(m_log&& m_log_, const T& t ) noexcept
 {
-    _m_log._ss << t;
-    return std::move(_m_log);
+    m_log_.ss_ << t;
+    return std::move(m_log_);
 }
 
 //choose relevant static mutex
@@ -91,21 +91,21 @@ public:
     {
         if (std::is_same_v<std::ofstream,T> )
             {
-                return _mut_file;
+                return mut_file_;
             }
         else if (std::is_same_v<std::ostream,T>)
             {
-                return _mut_console;
+                return mut_console_;
             }
         else
             {
-                return _any_common_mut;
+                return any_common_mut_;
             }
     };
 private:
-    inline static std::mutex _mut_console,
-                             _mut_file,
-                             _any_common_mut;
+    inline static std::mutex mut_console_,
+                             mut_file_,
+                             any_common_mut_;
 };
 #endif // M_LOG_H
 
