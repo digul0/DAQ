@@ -95,12 +95,15 @@ void m_controller::do_branch_full()
 //                  << miniIOstate_.temp_was_switched
 //                  << '\n';
             parse_and_push_into_result(splited_answer);
-            m_log() << settings_->position
+            m_log()
+                    << std::left << std::setw(6) << std::string("COM") + std::to_string(settings_->port)
+                    << " (" << settings_->position <<")"
                     << " : "  << model_->get_current_command()
                     << " << " << model_->get_current_answer()
                     << '\n';
             m_log(m_log::other::to_setted_log_file)
-                    << settings_->position
+                    << std::left << std::setw(6) << std::string("COM") + std::to_string(settings_->port)
+                    << " (" << settings_->position <<")"
                     << " : "  << model_->get_current_command()
                     << " << " << model_->get_current_answer()
                     << '\n';
