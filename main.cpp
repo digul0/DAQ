@@ -71,7 +71,8 @@ int DLL_EXPORT main_process()
         controller.setView(&view);
         try
             {
-                model.open_connection();
+                //model.open_connection();
+                model.try_to_open_connection(3, 2s);
                 controller.acqure_temperature();
                 if (controller.test_temperature())
                     {

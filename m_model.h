@@ -72,7 +72,10 @@ public:
     void execute_single_command (const std::string& command);
     void go_next_command();
     bool end_commands ();
+
+    void try_to_open_connection(size_t n_tries, std::chrono::seconds delay_before_tries);
     bool open_connection();
+    bool is_connection_opened();
     const std::string read_answer();
     const std::string get_current_command();
     const std::string get_current_answer();
@@ -83,10 +86,12 @@ private:
     void commands_pool_init();
     void check_end();
 
+    /** connection members*/
     int                           port_num_;
     std::unique_ptr<m_open_port>  port_impl_;
-    /** state members*/
+    bool                          connection_opened{false};
 
+    /** state members*/
     commands_pool                commands_pool_;
     commands_sequence*           current_commands_sequence_;
     std::string                  current_command_;

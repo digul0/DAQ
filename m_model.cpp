@@ -14,8 +14,35 @@ m_model& m_model::operator=(m_model&&) =default;
 m_model::~m_model() = default;
 bool m_model::open_connection()
 {
-  port_impl_ = std::make_unique<m_open_port>(port_num_); //can throw exceptions
-  return true;
+    port_impl_ = std::make_unique<m_open_port>(port_num_); //can throw exceptions
+    return true;
+}
+
+
+
+void m_model::try_to_open_connection(size_t n_tries, std::chrono::seconds delay_before_tries)
+{
+    for(size_t tries_counter = 0; tries_counter < n_tries ;)
+        {
+            try
+                {
+                    if (open_connection())
+                    {
+                      connection_opened = true;
+                      return;
+                    }
+                }
+            catch(std::exception_ptr& pex)
+                {
+                    std::this_thread::sleep_for(delay_before_tries);
+                    ++tries_counter;
+                    if (tries_counter == n_tries ) std::rethrow_exception(pex);
+                }
+        }
+}
+bool m_model::is_connection_opened()
+{
+    return port_impl_->is_valid();
 }
 /**
   Commands sequenses
@@ -160,8 +187,9 @@ void  m_model::execute_single_command (const std::string& command)
 {
     current_command_ = command;
     if (port_impl_)
-    port_impl_->write_line(current_command_);
-    else  throw std::logic_error("Port not opened!");
+        port_impl_->write_line(current_command_);
+    else
+        throw std::logic_error("Port not opened!");
 }
 void m_model::go_next_command()
 {
@@ -179,14 +207,19 @@ void m_model::check_end()
 const std::string
 m_model::read_answer()
 {
-    return answer_ = port_impl_->read_line();
+      if (port_impl_)
+          answer_ = port_impl_->read_line();
+      else
+          throw std::logic_error("Port not opened!");
+    return answer_;
 }
 //Choosing branch and recheck model::end_of_branch_ value
 void m_model::choose_commands_pool(CommandsPoolId poolid)
 {
     auto find_it =commands_pool_.find(poolid);
-    if ( find_it==commands_pool_.end()) throw std::logic_error ("Set of commands_sequence incorrect!");
-    current_commands_sequence_ = &find_it->second;//may return end();
+    if ( find_it==commands_pool_.end())
+        throw std::logic_error ("Set of commands_sequence incorrect!");
+    current_commands_sequence_ = &find_it->second;
     current_command_seq_it_    = current_commands_sequence_->begin();
     check_end();
 }

@@ -7,7 +7,10 @@
 // forward declarations
 class m_model;
 class m_view;
-namespace settings{struct settings_struct;}
+namespace settings
+{
+    struct settings_struct;
+}
 
 /**
 * @brief
