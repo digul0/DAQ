@@ -38,24 +38,24 @@ private:
     /** regexes */
     inline const static
     regex S0{"A0"  "(\\d{1})"   "(\\d{1})"  "(\\d{1})"   "(\\d{5})"};
-                  // ^^       ^^           ^^          ^^           ^^
-                  // A0       don't_use    don't_use   don't_use    block_S/N
+    //        ^^       ^^           ^^          ^^           ^^
+    //        A0       don't_use    don't_use   don't_use    block_S/N
     inline const static
     regex S1{"A1"                           "(\\d{1})"};
-                  // ^^                               ^^
-                  // A1                               position
+    //        ^^                               ^^
+    //        A1                               position
     inline const static
     regex S2{"A2"                           "(\\d{1})"};
-                  // ^^                               ^^
-                  // A2                               mode
+    //        ^^                               ^^
+    //        A2                               mode
     inline const static
     regex S3{"A3"  "(\\d{1})"   "(\\d{1})"  "(\\d{1})"  "(\\d{5})"};
-                  // ^^       ^^           ^^          ^^          ^^
-                  // A3       param_num    ch_number  mode        measured_data
+    //        ^^       ^^           ^^          ^^          ^^
+    //        A3       param_num    ch_number  mode        measured_data
     inline const static
     regex S4{"A4"                           "(\\d{1})"};
-                  // ^^                               ^^
-                  // A4                               temperature_mode
+    //        ^^                               ^^
+    //        A4                               temperature_mode
 
 };
 #endif // M_VIEW_H

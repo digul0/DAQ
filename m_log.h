@@ -1,9 +1,11 @@
 #ifndef M_LOG_H
 #define M_LOG_H
 
-#include "common_std_headers.h"
 #include <iomanip>
 #include <sstream>
+
+#include "common_std_headers.h"
+
 template<typename T>
 class Mutex_selector;
 
@@ -104,8 +106,8 @@ public:
     };
 private:
     inline static std::mutex mut_console_,
-                             mut_file_,
-                             any_common_mut_;
+           mut_file_,
+           any_common_mut_;
 };
 #endif // M_LOG_H
 

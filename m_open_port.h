@@ -12,39 +12,37 @@
 
 
 
-
+/**
+* @brief Provides configuration, connection and synchronous
+* read/write interface to the Com port.
+*/
 class m_open_port
 {
-    /**
-    *@brief
-    * Provides configuration, connection and synchronous
-    * read/write interface to the Com port.
-    */
+
 public:
-    m_open_port ()  =   delete;
+    m_open_port()                              = delete;
     explicit m_open_port (unsigned int numPort);
-    m_open_port(const m_open_port&) = delete;
+    m_open_port(const m_open_port&)            = delete;
     m_open_port& operator=(const m_open_port&) = delete;
     m_open_port(m_open_port&&);
-    m_open_port& operator=(m_open_port&&);//=default;
+    m_open_port& operator=(m_open_port&&);   //=default;
     ~m_open_port();
 
     // Interface functions
     void write_line(const std::string& command);
-    const std::string read_line ();
+    const std::string read_line();
     const std::string get_portNum();
-
+    bool is_valid();
 private:
-    bool open ();
+    bool open();
     void init();
     void close();
     void flushPort();
-    bool is_valid();
 
-    unsigned int num_of_port_;
+    unsigned int      num_of_port_;
     const std::string port_init_string_;
-    HANDLE com_port_handle_;
-    bool valid_; //rename to valid_, reverse logic
+    HANDLE            com_port_handle_;
+    bool              valid_;
 };
 #endif // M_OPEN_PORT_H
 

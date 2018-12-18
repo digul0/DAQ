@@ -35,6 +35,7 @@ struct settings_struct
 
 class SettingsParser
 {
+
 public:
     std::vector<settings_struct>
     get_settings_struct (const std::string& portmap_ini_name_, const std::string& job_ini_name_ );

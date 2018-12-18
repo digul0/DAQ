@@ -12,10 +12,11 @@ using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 using std::logic_error;
 
 m_controller::m_controller(const settings::settings_struct& ss):
-    settings_(std::make_unique<settings::settings_struct>(ss)),
-    miniIOstate_({0,0,false}),
-    delay_(500ms),
-    local_results_storage_(vector<ResultsStorage>(num_of_positions_))
+    settings_     (std::make_unique<settings::settings_struct>(ss)),
+    miniIOstate_  ({0,0,false}),
+    delay_        (500ms),
+    local_results_storage_     (vector<ResultsStorage>(num_of_positions_)),
+    stop_thread_flag_pointer_  {nullptr}
 {
 }
 //  Destructor provide emergency exit for any close console events.
