@@ -9,13 +9,14 @@ class m_model;
 class m_view;
 namespace settings{struct settings_struct;}
 
+/**
+* @brief
+* Provides the main application logic: control of the com-port polling algorithm using the model interface,
+* analysis of incoming responses, error handling and generation of an output data.
+*/
 class m_controller
 {
-    /**
-    * @brief
-    * Provides the main application logic: control of the com-port polling algorithm using the model interface,
-    * analysis of incoming responses, error handling and generation of an output data.
-    */
+
 public:
     explicit m_controller(const settings::settings_struct& ss);
     m_controller(const m_controller&) = delete;
@@ -58,6 +59,7 @@ public:
     template <typename Time_duration, typename Call>
     friend  void sleep_for_with_condition(Time_duration t, Call foo);
 private:
+    /// describe device's current state
     struct MiniIOstate
     {
         int  current_channel_number;

@@ -11,7 +11,8 @@ namespace settings
 }
 class m_open_port;
 
-/** Struct contained list of aviable commands for IO*/
+/** @brief Struct contained list of aviable commands for IO
+*/
 struct Commands_list
 {
     const std::string
@@ -36,13 +37,14 @@ struct Commands_list
     /** */
 };
 
+/**
+* @brief
+* Provides an interface for selecting and executing a precompiled command flow,
+* as well as receiving a response from the com port.
+*/
 class m_model
 {
-    /**
-    * @brief
-    * Provides an interface for selecting and executing a precompiled command flow,
-    * as well as receiving a response from the com port.
-    */
+
 public:
     enum class CommandsPoolId
     {

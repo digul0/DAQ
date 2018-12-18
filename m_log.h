@@ -9,12 +9,13 @@
 template<typename T>
 class Mutex_selector;
 
+/**
+* @brief
+* Provides multi-threaded console and file output.
+*/
 class m_log
 {
-    /**
-    * @brief
-    * Provides multi-threaded console and file output.
-    */
+
 public:
     enum class other { to_setted_log_file };
 
