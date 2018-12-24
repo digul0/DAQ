@@ -72,7 +72,7 @@ int DLL_EXPORT main_process()
         try
             {
                 //model.open_connection();
-                model.try_to_open_connection(3, 2s);
+                model.try_to_open_connection(3, 5s);
                 controller.acqure_temperature();
                 if (controller.test_temperature())
                     {

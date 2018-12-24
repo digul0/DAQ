@@ -36,6 +36,9 @@ void m_model::try_to_open_connection(size_t n_tries, std::chrono::seconds delay_
                 {
                     std::this_thread::sleep_for(delay_before_tries);
                     ++tries_counter;
+                    m_log() << "Try to open number: " << tries_counter <<'\n';
+                    m_log(m_log::other::to_setted_log_file)
+                            << "Try to open number: " << tries_counter <<'\n';
                     if (tries_counter == n_tries ) std::rethrow_exception(pex);
                 }
         }
@@ -183,7 +186,7 @@ void  m_model::execute_current_command ()
         execute_single_command(*current_command_seq_it_);
 
 }
-void  m_model::execute_single_command (const std::string& command)
+void  m_model::execute_single_command (const std::string& command) noexcept (false)
 {
     current_command_ = command;
     if (port_impl_)

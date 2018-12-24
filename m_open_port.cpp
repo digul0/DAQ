@@ -71,24 +71,26 @@ void m_open_port::init()
 {
 //structs DCB and COMMTIMEOUTS copied from port tuned by using TeraTerm.
     DCB dcb = {};
-    dcb.DCBlength =             sizeof(DCB)/*28*/;
-    dcb.BaudRate =             9600;
-    dcb.fBinary =              1;
+    dcb.DCBlength   =          sizeof(DCB)/*28*/;
+    dcb.BaudRate    =          9600;
+    dcb.fBinary     =          1;
     dcb.fDtrControl =          1; //mb 0x0? Dtr line?
     dcb.fRtsControl =          1;
-    dcb.ByteSize =             8;
+    dcb.ByteSize    =          8;
+    //other fields are null by default
 
     COMMTIMEOUTS timeouts = {};
     timeouts.ReadIntervalTimeout =        0xFFFFFFFF;
     timeouts.WriteTotalTimeoutConstant =    500;
+    //other fields are null by default
 
     DCB dcb_current = {};
     COMMTIMEOUTS timeouts_current = {};
-    GetCommState(com_port_handle_, &dcb_current);
+    GetCommState(com_port_handle_   , &dcb_current);
     GetCommTimeouts(com_port_handle_, &timeouts_current);
 
     if ( memcmp(&dcb_current,&dcb, sizeof(DCB) )!=0 )
-        SetCommState(com_port_handle_, &dcb);
+        SetCommState(com_port_handle_   , &dcb);
     if ( memcmp(&timeouts_current,&timeouts, sizeof(COMMTIMEOUTS) )!=0 )
         SetCommTimeouts(com_port_handle_, &timeouts);
 
@@ -98,8 +100,8 @@ void m_open_port::close()
 {
     if (is_valid())
         {
-            CloseHandle(com_port_handle_);
-            valid_ = false;
+            ::CloseHandle(com_port_handle_);
+            valid_           = false;
             com_port_handle_ = nullptr;
 #ifdef OPEN_CLOSE_LOG_ON
             m_log(m_log::other::to_setted_log_file)
@@ -113,16 +115,14 @@ void m_open_port::write_line(const string& command)
     /**
       Data transmit by protocol structure is: [ASCII command][CL+LF].
     */
-    //static const char eol[] = "\n";
-    if (!is_valid() || command.empty())
-        return;
-    constexpr char CRLF[2] = {'\r','\n'};
-    DWORD bytes_written = 0;
+    if (!is_valid() || command.empty())        return;
+    constexpr char CRLF[2]    = {'\r','\n'};
     flushPort();
     //Send command string without null-terminator
     const string full_command = command + string(CRLF);
-    size_t full_command_size = command.size() + sizeof(CRLF);
-    WriteFile(com_port_handle_, full_command.data(), full_command_size , &bytes_written, nullptr);
+    size_t full_command_size  = command.size() + sizeof(CRLF)/sizeof(*CRLF);
+    DWORD bytes_written       = 0;
+    ::WriteFile(com_port_handle_, full_command.data(), full_command_size , &bytes_written, nullptr);
     return ;
 }
 const string m_open_port::read_line()
@@ -131,23 +131,22 @@ const string m_open_port::read_line()
       Data receive by protocol structure is: [ASCII answer][CL+LF].
     */
     using std::cbegin, std::cend, std::search;
-    if (!is_valid())
-        return {};
-
-    char buf[256]      = {};
+    if (!is_valid())        return {};
+    //buff init and fill with zero values
+    char buf[256]          = {};
     DWORD sz_buf = sizeof(buf)/sizeof(*buf);
     constexpr char CRLF[2] = {'\r','\n'};
     // Handler of invalid answer event.
-    size_t try_counter = 0;
+    size_t try_counter     = 0;
     DWORD total_bytes_read = 0,
-          bytes_read = 0;
+          bytes_read       = 0;
     auto findCRLF = cend(buf);
         do
             {
                 if (++try_counter > 3) return "";//handle this obviously invalid answer later
-                ReadFile (com_port_handle_, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
+                ::ReadFile (com_port_handle_, &buf[total_bytes_read], sz_buf, &bytes_read, nullptr);
                 total_bytes_read+= bytes_read;
-                if (total_bytes_read > sz_buf)
+                if (total_bytes_read > sz_buf) //if buffer overflow
                     throw logic_error(string("IO error: reseived too long bytes sequence: ") + string(buf, sizeof(buf)) );
                 findCRLF = std::search(cbegin(buf), cend(buf), cbegin(CRLF), cend(CRLF));
             }
