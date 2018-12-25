@@ -1,7 +1,11 @@
 #include <algorithm>
 #include "m_open_port.h"
 
+#ifndef OPEN_CLOSE_LOG_OFF
 #define OPEN_CLOSE_LOG_ON
+#endif // OPEN_CLOSE_LOG_OFF
+
+
 #ifdef OPEN_CLOSE_LOG_ON
 #include "m_log.h"
 #endif // OPEN_CLOSE_LOG_ON
