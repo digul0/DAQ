@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <atomic>
+#include <sstream>
 #include <thread>
 #include <mutex>
 #include <fstream>
