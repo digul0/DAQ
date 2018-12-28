@@ -22,7 +22,7 @@ find_package(Boost COMPONENTS regex) #REQUIRED
 if (${Boost_FOUND})
   add_definitions(-DHAS_BOOST)
   if (${CMAKE_CXX_COMPILER_ID} EQUAL MSVC)
-    add_definitions("_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS")
+    add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
   endif()
   target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
   target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
