@@ -84,6 +84,7 @@ private:
     std::chrono::milliseconds   delay_;
     /// Device channels constant
     constexpr static size_t     num_of_positions_ {8};
+    /// Measurements data storage
     std::vector<ResultsStorage> local_results_storage_;
     std::atomic<bool>*          stop_thread_flag_pointer_;
 };

@@ -19,10 +19,12 @@ m_controller::m_controller(const settings::settings_struct& ss):
     stop_thread_flag_pointer_  {nullptr}
 {
 }
-//  Destructor provide emergency exit for any close console events.
-//  Do not add in m_controller::~m_controller() commands
-//  with total duration > delay_before_exit value
-//  in lock_ctrl_keys_exit(DWORD event_id).
+/**  Destructor provide emergency exit for any close console events
+ *  and handle exit procedure handlers
+ *  @warning Do not add in m_controller::~m_controller() commands
+*  with total duration > delay_before_exit value
+*  in lock_ctrl_keys_exit(DWORD event_id).
+ */
 m_controller::~m_controller()
 {
     if(miniIOstate_.current_channel_number!= 0)
@@ -242,7 +244,9 @@ void m_controller::acquire_55()
 {
     model_->choose_commands_pool(m_model::CommandsPoolId::switch_down);
     do_branch_full();
+
     m_log()<<"Switch and balanced temperature ... wait." << '\n';
+
     // Wait while temperature balanced.
     // std::this_thread::sleep_for(60s);.
     sleep_for_with_condition(60s, [self = this]()
@@ -256,7 +260,7 @@ void m_controller::acquire_55()
 }
 
 
-
+/// Used to return the copy of measurements data storage to main thread
 std::vector<m_controller::ResultsStorage>
 m_controller::get_local_results_storage()
 {
@@ -264,7 +268,10 @@ m_controller::get_local_results_storage()
 }
 
 
-
+/**  @brief Execute sepatate command
+ *   @warning this function do not change miniIOstate_!
+ *   don't use it!
+ */
 void m_controller::single_command_execute(const string& command)
 {
     model_->execute_single_command(command);
