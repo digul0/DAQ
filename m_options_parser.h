@@ -4,7 +4,7 @@
 #include "common_std_headers.h"
 
 /**
- * @brief Options files is a list of text-strings due to backward compatibility requrements.
+ * @brief Options files represents as a lists of text-strings due to backward compatibility requrements.
  */
 namespace settings
 {
@@ -35,11 +35,32 @@ class SettingsParser
 {
 
 public:
-    /// @return Settings container.
+    /**
+     * Join settings for both options file
+     * @param[in]  portmap_ini_name_  file contains folowing settings:
+     *    @code
+     *    Port Position Receptacle Temperature
+     *    81   B01-1    11         0
+     *    82   B01-2    11         0
+     *    83   B01-3    11         0
+     *    84   B01-4    11         0
+     *    ....
+     *    @endcode
+     * @param[in]  job_ini_name_    file contains Positions for operate.
+     *    @code
+     *    B01-1
+     *    B01-2
+     *
+     *    B05-2
+     *    ....
+     *    @endcode
+     * @return settings container.
+     */
     std::vector<settings_struct>
-    get_settings_struct (const std::string& portmap_ini_name_, const std::string& job_ini_name_ );
+    get_settings_struct (const std::string& portmap_ini_name_, const std::string& job_ini_name_ ) noexcept(false);
 private:
-    std::string file_to_string(const std::string& file_name,  size_t skip_n_first_lines = 0);
+    ///Read text file to string
+    std::string file_to_string(const std::string& file_name,  size_t skip_n_first_lines = 0) noexcept(false);
 };
 
 

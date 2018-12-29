@@ -13,7 +13,7 @@ namespace settings
 {
 vector<settings_struct>
 SettingsParser::get_settings_struct(const string& portmap_ini_name_,
-                                    const string& job_ini_name_)
+                                    const string& job_ini_name_) noexcept(false)
 {
     // Port Position Receptacle Temperature
     // from PortMap.ini.
@@ -79,7 +79,7 @@ SettingsParser::get_settings_struct(const string& portmap_ini_name_,
     return result;
 }
 
-string SettingsParser::file_to_string( const string& file_name, size_t skip_n_first_lines )
+string SettingsParser::file_to_string( const string& file_name, size_t skip_n_first_lines ) noexcept(false)
 {
     ifstream f_ {file_name};
     if (!f_.is_open())
