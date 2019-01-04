@@ -12,18 +12,23 @@ using std::stoi, std::log, std::stod, std::vector, std::string, std::to_string;
 using std::logic_error;
 
 m_controller::m_controller(const settings::settings_struct& ss):
+    //copy of settings::settings_struct
     settings_     (std::make_unique<settings::settings_struct>(ss)),
+    //default device state
     miniIOstate_  ({0,0,false}),
+    //default delay
     delay_        (500ms),
+    //storage thread local measurements
     local_results_storage_     (vector<ResultsStorage>(num_of_positions_)),
+    //pointer to atomic variable(for this thread interruption)
     stop_thread_flag_pointer_  {nullptr}
 {
 }
-/**  Destructor provide emergency exit for any close console events
+/** Destructor provide emergency exit for any close console events
  *  and handle exit procedure handlers
  *  @warning Do not add in m_controller::~m_controller() commands
-*  with total duration > delay_before_exit value
-*  in lock_ctrl_keys_exit(DWORD event_id).
+ *  with total duration > delay_before_exit value
+ *  in lock_ctrl_keys_exit(DWORD event_id).
  */
 m_controller::~m_controller()
 {
@@ -61,23 +66,28 @@ void m_controller::setInterruptFlag(std::atomic<bool>* interrupt_flag)
 }
 
 
+/**
+Implements a polling algorithm using the model interface to manage it.
+Validate and handle invalid incoming response.
 
+*/
 void m_controller::do_branch_full()
 {
     while(!model_->end_commands())
         {
-            // init try_counter for each command.
+            // initialization try_counter for each command.
             size_t try_counter = 0;
             string answer ;
 
             // Handler of invalid answer event.
+            // Validation proceed here.
             do
                 {
                     if (++try_counter > 3)
                         {
-                            throw logic_error("IO error: invalid answer recieved three times!");
+                            throw logic_error("IO error: invalid answer received three times!");
                         }
-                    model_->execute_current_command(); //try ex
+                    model_->execute_current_command();
                     std::this_thread::sleep_for(delay_);
                     answer = model_->read_answer();
                 }
@@ -91,11 +101,7 @@ void m_controller::do_branch_full()
 
             auto splited_answer = view_->split_answer(answer);
             //
-            miniIOstate_.state_changer(splited_answer);
-//            m_log() << miniIOstate_.current_channel_number
-//                  << miniIOstate_.current_mode
-//                  << miniIOstate_.temp_was_switched
-//                  << '\n';
+            miniIOstate_.change_state(splited_answer);
             parse_and_push_into_result(splited_answer);
             m_log()
                     << std::left << std::setw(6) << std::string("COM") + std::to_string(settings_->port)
@@ -115,7 +121,9 @@ void m_controller::do_branch_full()
 }
 
 
-
+/// Tokenize response and fill local_results_storage_ with these values.
+/// Also check consistency between received commands and
+/// internal state of the device by comparison with m_controller::miniIOstate_.
 void m_controller::parse_and_push_into_result(const vector<string> splited_answer)
 {
     auto from_Ohm_to_T = [](double Ohm)
@@ -145,7 +153,7 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
             int ch_number      = std::stoi(splited_answer[2]) - 1; // converted to index
             int mode           = std::stoi(splited_answer[3]);
             double measured_data  = std::stod(splited_answer[4]);
-            //check consistency between recieved commands and internal state of the device
+            //check consistency between received commands and internal state of the device
             if (miniIOstate_.current_channel_number!= ch_number ||
                     miniIOstate_.current_mode!= mode
                )
@@ -157,8 +165,8 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
                         local_results_storage_[ch_number].I_SLD_SET          = measured_data / 10.0 ;
                     else if (param_num == 2)
                         {
-                            local_results_storage_[ch_number].T_SET_Ohm          = measured_data ;
-                            local_results_storage_[ch_number].T_SET              = from_Ohm_to_T(measured_data) ;
+                            local_results_storage_[ch_number].T_SET_Ohm      = measured_data ;
+                            local_results_storage_[ch_number].T_SET          = from_Ohm_to_T(measured_data) ;
                         }
                     else if (param_num == 3)
                         local_results_storage_[ch_number].LIMIT              = measured_data / 10.0;
@@ -170,8 +178,8 @@ void m_controller::parse_and_push_into_result(const vector<string> splited_answe
                         local_results_storage_[ch_number].I_SLD_REAL         = measured_data / 10.0 ;
                     else if (param_num == 2)
                         {
-                            local_results_storage_[ch_number].T_REAL_Ohm         = measured_data;
-                            local_results_storage_[ch_number].T_REAL             = from_Ohm_to_T(measured_data);
+                            local_results_storage_[ch_number].T_REAL_Ohm     = measured_data;
+                            local_results_storage_[ch_number].T_REAL         = from_Ohm_to_T(measured_data);
                         }
                     else if (param_num == 3)
                         local_results_storage_[ch_number].PD_INT_average     = measured_data / 1000.0;
@@ -196,16 +204,16 @@ void m_controller::acqure_temperature()
 }
 
 // if any local_results_storage_[i].T_SET value is
-// outside spicified range or set skip the test
+// outside specified range or set skip the test
 // by options requirements it return false.
 
-// don't run before acqure_temperature().
+/// @warning don't run before acquire_temperature().
 bool m_controller::test_temperature()
 {
     enum {TEMP_MODE_DEFAULT = 0, TEMP_MODE_NOSWITCH = 1 };
     if (settings_->temperature_mode == TEMP_MODE_NOSWITCH )
         return false; // ->skip test by options requirements
-    constexpr double deviance = 0.25 ; //%
+    constexpr double deviance            = 0.25; //%
     constexpr double ambient_temperature = 25.0;
 
     bool non_standart_temperature = false;
@@ -268,9 +276,9 @@ m_controller::get_local_results_storage()
 }
 
 
-/**  @brief Execute sepatate command
+/**  @brief Execute separate command
  *   @warning this function do not change miniIOstate_!
- *   don't use it!
+ *   don't use it nowhere but destructor!
  */
 void m_controller::single_command_execute(const string& command)
 {
@@ -279,7 +287,7 @@ void m_controller::single_command_execute(const string& command)
 
 
 
-void m_controller::MiniIOstate::state_changer(const vector<string> splited_answer)
+void m_controller::MiniIOstate::change_state(const vector<string> splited_answer)
 {
     // look at model_ regex schema
     const auto& command_name = splited_answer[0];

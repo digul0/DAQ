@@ -26,6 +26,7 @@ public:
     m_controller& operator=(const m_controller&) = delete;
     ~m_controller(); //have no-trivial implementation
 
+    ///Storage of measurements
     struct ResultsStorage
     {
         std::string Position;
@@ -42,11 +43,10 @@ public:
         double PD_EXT_average;
         double PD_EXT_error;
     };
-    ///@{
+
     /** MVC interface functions */
     void setView(m_view* view);
     void setModel(m_model* model);
-    ///@}
 
     /* interface functions*/
     void acqure_temperature();
@@ -54,9 +54,7 @@ public:
     void acquire_55();
     bool test_temperature();
     void do_branch_full();
-    void single_command_execute(const std::string& command);
 
-    void parse_and_push_into_result(const std::vector<std::string> splited_answer);
     std::vector<ResultsStorage> get_local_results_storage();
 
     /* multithread functions*/
@@ -71,9 +69,11 @@ private:
         int  current_mode;
         bool temp_was_switched;
 
-        void state_changer(const std::vector<std::string> splited_answer);
+        void change_state(const std::vector<std::string> splited_answer);
     };
 
+    void single_command_execute(const std::string& command);
+    void parse_and_push_into_result(const std::vector<std::string> splited_answer);
     /* MVC members*/
     m_view* view_;
     m_model* model_;
@@ -88,6 +88,7 @@ private:
     constexpr static size_t     num_of_positions_ {8};
     /// Measurements data storage
     std::vector<ResultsStorage> local_results_storage_;
+    ///pointer to atomic variable(for this thread interruption)
     std::atomic<bool>*          stop_thread_flag_pointer_;
 };
 
