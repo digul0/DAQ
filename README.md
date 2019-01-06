@@ -24,14 +24,16 @@ Also, each device can operate at 2 set temperatures (usually room and high).
 
 There is also a limited ability to switch temperatures programmatically.
 
-##Request structure
-  Todo
-##Response structure
-  Todo
-##Dependencies
+## Request structure
+Todo
+
+## Response structure
+Todo
+
+## Dependencies
 boost::regex optionally, if it is not exist used std::regex
 
-##Supported Platform
+## Supported Platform
 Windows only. Not necessary to multiplatform yet.
 
 ## Translations
