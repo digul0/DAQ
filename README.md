@@ -22,6 +22,7 @@ Also, each device can operate at 2 set temperatures (usually room and high).
 There is also a limited ability to switch temperatures programmatically.
 
 When running, DAQ creates 2 log file Answers#DataTime#.txt and Results#DataTime#.txt formats.
+In the root folder you need to create 'Answers' and 'Results' dirs.
 The Answers file contains a copy of the output from sdout.
 The Results file contains a structured table of measurement results, sorted by the first column.
 
