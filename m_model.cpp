@@ -14,11 +14,9 @@ m_model& m_model::operator=(m_model&&) =default;
 m_model::~m_model() = default;
 bool m_model::open_connection()
 {
-    port_impl_ = std::make_unique<m_open_port>(port_num_); //can throw exceptions
+    port_impl_ = std::make_unique<m_open_port>(port_num_); //can throw exception during construct object
     return true;
 }
-
-
 
 void m_model::try_to_open_connection(size_t n_tries, std::chrono::seconds delay_before_tries)
 {
@@ -43,14 +41,14 @@ void m_model::try_to_open_connection(size_t n_tries, std::chrono::seconds delay_
                 }
         }
 }
+
 bool m_model::is_connection_opened()
 {
     return port_impl_->is_valid();
 }
-/**
-  Commands sequenses
-  Add new sequenses here
- */
+
+//  Commands sequenses
+//  Add new sequenses here
 void m_model::commands_pool_init()
 {
     commands_sequence acqure_temperature =
@@ -180,12 +178,14 @@ void m_model::commands_pool_init()
 
 
 }
+
 void  m_model::execute_current_command ()
 {
     if (!end_of_branch_)
         execute_single_command(*current_command_seq_it_);
 
 }
+
 void  m_model::execute_single_command (const std::string& command) noexcept (false)
 {
     current_command_ = command;
@@ -194,6 +194,7 @@ void  m_model::execute_single_command (const std::string& command) noexcept (fal
     else
         throw std::logic_error("Port not opened!");
 }
+
 void m_model::go_next_command()
 {
 
@@ -202,6 +203,7 @@ void m_model::go_next_command()
     check_end();
 
 }
+
 void m_model::check_end()
 {
     end_of_branch_ = (current_command_seq_it_ == current_commands_sequence_->end());
@@ -216,6 +218,7 @@ m_model::read_answer()
           throw std::logic_error("Port not opened!");
     return answer_;
 }
+
 //Choosing branch and recheck model::end_of_branch_ value
 void m_model::choose_commands_pool(CommandsPoolId poolid)
 {
@@ -226,15 +229,18 @@ void m_model::choose_commands_pool(CommandsPoolId poolid)
     current_command_seq_it_    = current_commands_sequence_->begin();
     check_end();
 }
+
 bool  m_model::end_commands ()
 {
     return end_of_branch_;
 }
+
 const std::string
 m_model::get_current_command()
 {
     return current_command_;
 }
+
 const std::string
 m_model::get_current_answer()
 {

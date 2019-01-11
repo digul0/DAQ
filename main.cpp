@@ -8,6 +8,7 @@
 #include "m_controller.h"
 #include "m_options_parser.h"
 #include "m_log.h"
+#include "windows.h"
 
 #ifdef BUILD_DLL
 #define DLL_EXPORT __declspec(dllexport)

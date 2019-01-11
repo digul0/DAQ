@@ -69,7 +69,6 @@ void m_controller::setInterruptFlag(std::atomic<bool>* interrupt_flag)
 /**
 Implements a polling algorithm using the model interface to manage it.
 Validate and handle invalid incoming response.
-
 */
 void m_controller::do_branch_full()
 {
@@ -93,14 +92,12 @@ void m_controller::do_branch_full()
                 }
             while (!view_->is_valid_answer(answer));
 
-            /** thread interrupt point here
-              */
+            // thread interrupt point here
             if (stop_thread_flag_pointer_!=nullptr &&
                     stop_thread_flag_pointer_->load())  // global atomic variable from main thread.
                 throw logic_error("Emergency interrupt");
 
             auto splited_answer = view_->split_answer(answer);
-            //
             miniIOstate_.change_state(splited_answer);
             parse_and_push_into_result(splited_answer);
             m_log()

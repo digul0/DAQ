@@ -4,7 +4,7 @@
 #include "common_std_headers.h"
 
 
-// forward declarations
+
 class m_model;
 class m_view;
 namespace settings
@@ -44,7 +44,7 @@ public:
         double PD_EXT_error;
     };
 
-    /** MVC interface functions */
+    /* MVC interface functions */
     void setView(m_view* view);
     void setModel(m_model* model);
 

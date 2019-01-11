@@ -49,10 +49,10 @@ public:
     enum class CommandsPoolId
     {
         acqure_temperature = 0,
-        acquire_25 = 1,
-        switch_up = 2,
-        switch_down = 3,
-        switch_to_default = 4
+        acquire_25         = 1,
+        switch_up          = 2,
+        switch_down        = 3,
+        switch_to_default  = 4
     };
 
     explicit m_model(const settings::settings_struct& ss );
