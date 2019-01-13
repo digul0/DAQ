@@ -88,6 +88,7 @@ int run_acquisition_proc()
                 // any exception lead to exit thread
                 m_log()<< ex.what() << '\n';
                 m_log(m_log::other::to_setted_log_file)<< ex.what() <<'\n';
+                return;
             }
         // thread-safe writing from local_results_storage
         // to global_results_storage.
