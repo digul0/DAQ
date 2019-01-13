@@ -1,8 +1,4 @@
 # DAQ (Data acquisition)
-<div align="center">
-    <img src="./forReadme/image.jpg" alt="Device" />
-  </a>
-</div>
 
 The DAQ application is designed to automate the process of acquisition an array of specific devices through virtual com ports and generating logs of the appropriate format.
 ## Overview
